@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">신규회원</h5>
+      </div>
+      <form id="memberEditForm" action="/admin/member/new" method="POST">
+        <input type="hidden" name="newRole" value="회원">
+        <div class="container mb-3">
+          <a href="/admin/member" class="btn btn-secondary w-100 mb-3">돌아가기</a>
+          <button type="submit" class="btn btn-warning w-100 mb-3">등록</button>
+        </div>
+        <div class="container mb-3">
+          <div class="mb-3">
+            <label for="editName" class="form-label">이름</label>
+            <input type="text" class="form-control" id="newName" name="newName">
+          </div>
+          <div class="mb-3">
+            <label for="editPhone" class="form-label">전화번호</label>
+            <input type="text" class="form-control" id="newPhone" name="newPhone">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newJoin">가입일</label>
+              <input class="form-select" type="date" id="newJoin" name="newJoin" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="newBirth">생일</label>
+              <input class="form-select" type="date" id="newBirth" name="newBirth" required>
+          </div>
+          <div class="mb-3">
+            <label for="newPlay" class="form-label">플레이</label>
+            <select class="form-select" aria-label="Default select example" id="newPlay" name="newPlay">
+              <option value="오른손, 양손 백핸드">오른손, 양손 백핸드</option>
+              <option value="오른손, 한순 백핸드">오른손, 한손 백핸드</option>
+              <option value="왼손, 양손 백핸드">왼손, 양손 백핸드</option>
+              <option value="왼손, 한손 백핸드">왼손, 한손 백핸드</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="newRacquet" class="form-label">라켓</label>
+            <input type="text" class="form-control" id="newRacquet" name="newRacquet">
+          </div>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('newJoin').value = today;
+      document.getElementById('newBirth').value = today;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    function deleteForm(event) {
+      var confirmation = confirm("정말로 리그를 삭제하시겠습니까?");
+      if (confirmation) {
+        document.getElementById("deleteCommand").value = "true";
+        document.getElementById("leagueEnd").submit(); // 사용자가 '네'를 선택한 경우 폼을 제출
+      } else {
+        event.preventDefault(); // 기본 폼 제출을 막음
+      }
+    }
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3 mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center"> <%= league.name %> 마감</h5>
+      </div>
+      <div class="mb-3">
+        <form id="leagueEnd" action="/league/end" method="POST">
+          <input type="hidden" name="leagueIndex" value="<%= leagueIndex %>">
+          <input type="hidden" name="deleteCommand" value="false" id="deleteCommand">
+          <div class="d-flex justify-content-center">
+            <div class="col">
+              <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">돌아가기</button>
+            </div>
+            <div class="ms-1 me-1"></div>
+            <div class="col">
+              <button type="submit" class="btn btn-warning w-100">리그마감</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="mb-3">
+        <div class="mb-2">
+          <strong>진행자 한마디</strong>
+        </div>
+        
+        <textarea type="text" class="form-control border" rows="3" id="board-contents" name="managerComment" placeholder="내용을 입력해주세요."></textarea>
+      </div>
+      
+      <div class="accordion mb-4" id="accordionExample">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button bg-warning text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              기본정보
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item mb-1">
+                  <span>방식</span>
+                  &nbsp;
+                  <strong><%= league.format %></strong>
+                </li>
+                <li class="list-group-item mb-1">
+                  <span>유형</span>
+                  &nbsp;
+                  <strong><%= league.type %></strong>
+                </li>
+                <li class="list-group-item mb-1">
+                  <span>장소</span>
+                  &nbsp;
+                  <strong><%= league.court %></strong>
+                </li>
+                <li class="list-group-item mb-1">
+                  <span>날짜</span>
+                  &nbsp;
+                  <strong><%= league.date.replace(/-/g, '.') %></strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-warning text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              참가자 <%= league.people %>명
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <div class="row">
+                <div class="col text-center">
+                  <strong>시드</strong> &nbsp; <strong class="fw-medium"><%= league.seedPeople %> 명</strong>
+                  <ul class="list-group list-group-flush">
+                    <% league.players.filter(player => player.seed.startsWith('시드')).forEach(function(player, index) { %>
+                      <li class="list-group-item"><%= player.name %></li>
+                    <% }); %>
+                  </ul>
+                </div>
+                <div class="col text-center">
+                  <strong>비시드</strong> &nbsp; <strong class="fw-medium"><%= league.noSeedPeople %> 명</strong>
+                  <ul class="list-group list-group-flush">
+                    <% league.players.filter(player => player.seed.startsWith('선수')).forEach(function(player, index) { %>
+                      <li class="list-group-item"><%= player.name %></li>
+                    <% }); %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-warning text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              간식점수
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>점수</th>
+                    <th>비고</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (league.snackScores && league.snackScores.length > 0) { %>
+                    <% league.snackScores.forEach(function(snackScore, index) { %>
+                      <tr>
+                        <th scope="row"><%= snackScore.name %></th>
+                        <td><%= snackScore.score %></td>
+                        <td><%= snackScore.remark %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-warning text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              리그순위
+            </button>
+          </h2>
+          <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>이름</th>
+                    <th>승</th>
+                    <th>패</th>
+                    <th>총득</th>
+                    <th>총실</th>
+                    <th>득실</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% players.forEach(function(player, index) { %>
+                    <tr>
+                      <th scope="row"><%= player.rank %></th>
+                      <td>
+                        <% if (player.seed == true) { %>
+                         <p><%= player.name %>(s)</p>
+                        <% } else { %>
+                            <p><%= player.name %></p>
+                        <% } %>
+                      </td>
+                      <td class="text-primary fw-bold"><%= player.wins %></td>
+                      <td class="text-danger fw-bold"><%= player.losses %></td>
+                      <td><%= player.totalScore %></td>
+                      <td><%= player.totalLostScore %></td>
+                      <td><%= player.totalScore - player.totalLostScore %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed bg-warning text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+              매치결과
+            </button>
+          </h2>
+          <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>팀1</th>
+                    <th>팀2</th>
+                    <th>점수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% league.matches.forEach(function(match, index) { %>
+                    <tr>
+                      <th scope="row"><%= index + 1 %></th>
+                      <td>
+                        <%= match.team1[0] %>
+                        <br>
+                        <%= match.team1[1] %>
+                      </td>
+                      <td>
+                        <%= match.team2[0] %>
+                        <br>
+                        <%= match.team2[1] %>
+                      </td>
+                      <% if (match.score) { %>
+                        <td class="text-primary fw-bold"><%= match.score %></td>
+                      <% } else { %>
+                        <td class="text-danger fw-bold">미완</td>
+                      <% } %>
+                      <!-- <td><%= match.score || '미완' %></td> -->
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

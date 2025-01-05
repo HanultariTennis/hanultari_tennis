@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">코트수정</h5>
+      </div>
+      <form id="courtEditForm" action="/admin/court/edit" method="POST">
+        <div class="container">
+          <a href="/admin/court" class="btn btn-secondary w-100 mb-3">돌아가기</a>
+          <button class="btn btn-warning w-100 mb-3" onclick="submitForm(event)">변경등록</button>
+        </div>
+        <div class="container">
+          <input type="hidden" id="editCourtData" name="editCourtData" value="">
+          <div class="mb-3">
+            <label for="editPlace" class="form-label">장소</label>
+            <input type="text" class="form-control w-100" id="editPlace" name="editPlace" value="<%= courtData[0].place %>">
+          </div>
+          <div class="mb-3">
+            <table class="table text-center">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col" style="width: 30%;">이름</th>
+                  <th scope="col" style="width: 25%;">표면</th>
+                  <th scope="col" style="width: 25%;">타입</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody id="courtTableBody">
+                <% courtData.forEach((row, index) => { %>
+                  <tr>
+                    <th scope="row"><%= index + 1 %></th>
+                    <td>
+                      <input type="text" class="form-control form-control-sm" value="<%= row.court %>">
+                    </td>
+                    <td>
+                      <select class="form-select form-select-sm" aria-label="Default select example">
+                        <option value="하드" <%= row.surface === '하드' ? 'selected' : '' %>>하드</option>
+                        <option value="인조잔디" <%= row.surface === '인조잔디' ? 'selected' : '' %>>인조잔디</option>
+                        <option value="클레이" <%= row.surface === '클레이' ? 'selected' : '' %>>클레이</option>
+                        <option value="카펫" <%= row.surface === '카펫' ? 'selected' : '' %>>카펫</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select class="form-select form-select-sm" aria-label="Default select example">
+                        <option value="실외" <%= row.type === '실외' ? 'selected' : '' %>>실외</option>
+                        <option value="실내" <%= row.type === '실내' ? 'selected' : '' %>>실내</option>
+                      </select>
+                    </td>
+                    <td>
+                      <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px; "onclick="deleteRow(this)">
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary w-100" onclick="addRow()">코트 +</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+  <script>
+    function addRow() {
+      var table = document.getElementById("courtTableBody");
+      var rowCount = table.rows.length;
+      var row = table.insertRow(rowCount);
+
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      var cell3 = row.insertCell(2);
+      var cell4 = row.insertCell(3);
+      var cell5 = row.insertCell(4);
+
+      cell1.innerHTML = `
+        <strong>${rowCount + 1}</strong>
+      `;
+
+      cell2.innerHTML = `
+        <input type="text" class="form-control form-control-sm" placeholder="ex)1번코트">
+      `;
+
+      cell3.innerHTML = `
+        <select class="form-select form-select-sm" aria-label="Default select example">
+          <option value="하드" selected>하드</option>
+          <option value="인조잔디">인조잔디</option>
+          <option value="클레이">클레이</option>
+          <option value="카펫">카펫</option>
+        </select>
+
+      `;
+      cell4.innerHTML = `
+        <select class="form-select form-select-sm" aria-label="Default select example">
+          <option value="실외" selected>실외</option>
+          <option value="실내">실내</option>
+        </select>
+      `;
+
+      cell5.innerHTML = `
+        <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px; "onclick="deleteRow(this)">
+      `;
+    }
+
+    function deleteRow(button) {
+      var row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+
+      var table = document.getElementById("courtTableBody");
+
+      for (var i = 0; i < table.rows.length; i++) {
+        var currentRow = table.rows[i];
+
+        currentRow.cells[0].innerHTML = `
+          <strong>${i + 1}</strong>
+        `;
+      }
+    }
+
+    function submitForm(event) {
+      var table = document.getElementById("courtTableBody");
+      var courts = [];
+      var place = document.getElementById("editPlace").value;
+
+      for(var i = 0; i < table.rows.length; i++) {
+        var currentRow = table.rows[i];
+
+        var court = currentRow.cells[1].querySelector("input").value;
+        var surface = currentRow.cells[2].querySelector("select").value;
+        var type = currentRow.cells[3].querySelector("select").value;
+
+        // var court = currentRow.cells[1].getElementById("newCourt").value;
+        // var surface = currentRow.cells[2].getElementById("newSurface").value;
+        // var type = currentRow.cells[3].getElementById("newType").value;
+
+        if(!place) {
+          alert('장소를 확인해주세요!');
+          event.preventDefault();
+          return;
+        } else if (!court) {
+          alert('코트 이름을 확인해주세요!');
+          event.preventDefault();
+          return;
+        } else {
+
+        }
+
+        courts.push({
+          place: place,
+          court: court,
+          surface: surface,
+          type: type
+        });
+      }
+
+      console.log('테스트');
+      console.log(courts);
+
+      var courtsJson = JSON.stringify(courts);
+      document.getElementById("editCourtData").value = courtsJson;
+      document.getElementById("courtForm").submit();
+    }
+  </script>
+</body>
+</html>

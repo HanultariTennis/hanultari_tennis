@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>새 글 작성</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container mt-3">
+      <form id="board-form" action="/notice/edit/" method="POST">
+        <input type="hidden" id="targetId" name="targetId" value="<%= board.id %>">
+        <input type="hidden" id="date" name="editDate" required>
+        <input type="hidden" id="author" name="editAuthor" value="<%= board.author %>" required>
+        <div class="d-flex justify-content-center mb-3">
+          <button type="submit" class="btn btn-warning w-50" onclick="checkValidity()">등록</button>
+          <div class="ms-1 me-1"></div>
+          <a type="button" class="btn btn-secondary w-50" href="/notice">뒤로가기</a>
+        </div>
+        <div class="mb-2">
+          <h5 class="text-warning" style="font-size: smaller;"><%= page %></h5>
+        </div>
+        <div class="mb-3 border-bottom">
+          <input type="text" class="form-control border-white fs-3" id="board-summary" name="editSummary" value="<%= board.summary %>">
+        </div>
+        <div class="mb-3 border-bottom">
+          <textarea type="text" class="form-control border-white" rows="20" id="board-contents" name="editContents"><%= board.contents %></textarea>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer') %>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var today = new Date().toISOString().substr(0, 10);
+        document.getElementById("date").value = today;
+    });
+
+    document.getElementById('board-form').addEventListener('submit', function(e) {
+      const boardsummary = document.getElementById('board-summary').value;
+      const boardContents = document.getElementById('board-contents').value;
+
+      if (!boardsummary) {
+        alert('제목을 입력해주세요!');
+        e.preventDefault();
+      } else if (boardsummary.length > 100) {
+        alert('제목은 100자 이내이어야 해요!');
+        e.preventDefault();
+      } else if (!boardContents) {
+        alert('내용을 입력해주세요!');
+        e.preventDefault();
+      } else if (boardContents.length > 1000) {
+        alert('내용은 1000자 이내이어야 해요!');
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

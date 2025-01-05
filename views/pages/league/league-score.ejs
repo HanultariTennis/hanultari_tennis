@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center mb-3"><%= leagueName %></h5>
+      <h5 class="d-flex justify-content-center mb-3"><%= parseInt(matchIndex) + 1 %>번 매치 점수</h5>
+      <form action="/league/score" method="POST" onsubmit="return validateScores()">
+        <input type="hidden" name="leagueIndex" value="<%= leagueIndex %>">
+        <input type="hidden" name="matchIndex" value="<%= matchIndex %>">
+        <div class="container mb-3">
+          <div class="row mb-2">
+            <div class="col bg-warning rounded-2 pt-2 pb-2">
+              <div class="row">
+                <div class="col m-auto">
+                  <div>
+                    <% const team1Player1 = leaguePlayers.find(function(p) { return p.name === match.team1[0]; }); %>
+                    <% if (team1Player1.seed.startsWith('시드')) { %>
+                      <strong class="fs-5"><%= match.team1[0] %>(S)</strong>
+                    <% } else { %>
+                      <strong class="fs-5"><%= match.team1[0] %></strong>
+                    <% } %>
+                  </div>
+                  <div>
+                    <% const team1Player2 = leaguePlayers.find(function(p) { return p.name === match.team1[1]; }); %>
+                    <% if (team1Player2.seed.startsWith('시드')) { %>
+                      <strong class="fs-5"><%= match.team1[1] %>(S)</strong>
+                    <% } else { %>
+                      <strong class="fs-5"><%= match.team1[1] %></strong>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="col text-end mt-2 mb-2">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical radio toggle button group">
+                    <input type="radio" class="btn-check" name="team1Position" id="vbtn-radio1" autocomplete="off" checked>
+                    <label class="btn btn-outline-danger" for="vbtn-radio1" id="label1" value="player1Deuce">듀스코트</label>
+                  
+                    <input type="radio" class="btn-check" name="team1Position" id="vbtn-radio2" autocomplete="off">
+                    <label class="btn btn-outline-danger" for="vbtn-radio2" id="label2" value="player2Deuce">애드코트</label>
+                  </div>
+                </div>
+                <div>
+                  <% let team1Score; %>
+                  <% if (match.score) { %>
+                  <% team1Score = match.score.split(':')[0]; %>
+                  <% team2Score = match.score.split(':')[1]; %>
+                  <% } else { %>
+                  <% team1Score = 0; %>
+                  <% team2Score = 0; %>
+                  <% } %>
+                  <select name="team1Score" id="team1Score" class="form-select w-100 mt-2" aria-label="Large select example" required>
+                    <option value="0" <%= team1Score == 0 ? 'selected' : '' %>>0점</option>
+                    <option value="1" <%= team1Score == 1 ? 'selected' : '' %>>1점</option>
+                    <option value="2" <%= team1Score == 2 ? 'selected' : '' %>>2점</option>
+                    <option value="3" <%= team1Score == 3 ? 'selected' : '' %>>3점</option>
+                    <option value="4" <%= team1Score == 4 ? 'selected' : '' %>>4점</option>
+                    <option value="5" <%= team1Score == 5 ? 'selected' : '' %>>5점</option>
+                    <option value="6" <%= team1Score == 6 ? 'selected' : '' %>>6점</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-4"></div>
+          </div>
+          <div class="row mb-2 text-center">
+            <strong class="fs-2 m-auto">VS</strong>
+          </div>
+          <div class="row mb-2">
+            <div class="col-4"></div>
+            <div class="col bg-warning rounded-2 pt-2 pb-2 text-end">
+              <div class="row">
+                <div class="col text-start mt-2 mb-2">
+                  <div class="btn-group-vertical" role="group" aria-label="Vertical radio toggle button group 2">
+                    <input type="radio" class="btn-check" name="team2Position" id="vbtn-radio3" autocomplete="off" checked>
+                    <label class="btn btn-outline-danger" for="vbtn-radio3" id="label3" value="player1Deuce">듀스코트</label>
+                  
+                    <input type="radio" class="btn-check" name="team2Position" id="vbtn-radio4" autocomplete="off">
+                    <label class="btn btn-outline-danger" for="vbtn-radio4" id="label4" value="player2Deuce">애드코트</label>
+                  </div>
+                </div>
+                <div class="col m-auto">
+                  <div>
+                    <% const team2Player1 = leaguePlayers.find(function(p) { return p.name === match.team2[0]; }); %>
+                    <% if (team2Player1.seed.startsWith('시드')) { %>
+                      <strong class="fs-5"><%= match.team2[0] %>(S)</strong>
+                    <% } else { %>
+                      <strong class="fs-5"><%= match.team2[0] %></strong>
+                    <% } %>
+                  </div>
+                  <div>
+                    <% const team2Player2 = leaguePlayers.find(function(p) { return p.name === match.team2[1]; }); %>
+                    <% if (team2Player2.seed.startsWith('시드')) { %>
+                      <strong class="fs-5"><%= match.team2[1] %>(S)</strong>
+                    <% } else { %>
+                      <strong class="fs-5"><%= match.team2[1] %></strong>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <select name="team2Score" id="team2Score" class="form-select w-100 mt-2" aria-label="Large select example" required>
+                  <option value="0" <%= team2Score == 0 ? 'selected' : '' %>>0점</option>
+                  <option value="1" <%= team2Score == 1 ? 'selected' : '' %>>1점</option>
+                  <option value="2" <%= team2Score == 2 ? 'selected' : '' %>>2점</option>
+                  <option value="3" <%= team2Score == 3 ? 'selected' : '' %>>3점</option>
+                  <option value="4" <%= team2Score == 4 ? 'selected' : '' %>>4점</option>
+                  <option value="5" <%= team2Score == 5 ? 'selected' : '' %>>5점</option>
+                  <option value="6" <%= team2Score == 6 ? 'selected' : '' %>>6점</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div>
+            빨간 버튼으로 수비 포지션을 선택하세요.
+            <br>
+            팀별 점수를 선택하세요.
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <button type="submit" class="btn btn-warning w-50">점수입력</button>
+          <div class="ms-1 me-1"></div>
+      </form>
+        <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+  <script>
+    function validateScores() {
+      const team1Score = document.getElementById('team1Score').value;
+      const team2Score = document.getElementById('team2Score').value;
+
+      if ((team1Score !== '6' && team2Score !== '6') || (team1Score === '6' && team2Score === '6')) {
+        alert('점수는 한 팀이 6점이어야 하고, 두 팀 모두 6점일 수 없습니다.');
+        return false;
+      }
+      return true;
+    }
+
+    // 함수 정의: 버튼이 클릭될 때 실행
+    function updateButtonLabels() {
+      const radio1 = document.getElementById('vbtn-radio1');
+      const radio2 = document.getElementById('vbtn-radio2');
+      const radio3 = document.getElementById('vbtn-radio3');
+      const radio4 = document.getElementById('vbtn-radio4');
+      const label1 = document.getElementById('label1');
+      const label2 = document.getElementById('label2');
+      const label3 = document.getElementById('label3');
+      const label4 = document.getElementById('label4');
+
+      if (radio1.checked) {
+        label1.textContent = '듀스코트';
+        label2.textContent = '애드코트';
+      } else if (radio2.checked) {
+        label1.textContent = '애드코트';
+        label2.textContent = '듀스코트';
+      }
+
+      if (radio3.checked) {
+        label3.textContent = '듀스코트';
+        label4.textContent = '애드코트';
+      } else if (radio4.checked) {
+        label3.textContent = '애드코트';
+        label4.textContent = '듀스코트';
+      }
+
+    }
+
+    // 이벤트 리스너: 라디오 버튼이 클릭될 때마다 함수 호출
+    document.getElementById('vbtn-radio1').addEventListener('click', updateButtonLabels);
+    document.getElementById('vbtn-radio2').addEventListener('click', updateButtonLabels);
+    document.getElementById('vbtn-radio3').addEventListener('click', updateButtonLabels);
+    document.getElementById('vbtn-radio4').addEventListener('click', updateButtonLabels);
+  </script>
+</body>
+</html>

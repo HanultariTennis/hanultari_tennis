@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .screenshot {
+      position: fixed;
+      bottom: 15%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const screenshotButton = document.getElementById('screenshotButton');
+
+      if (screenshotButton) {
+        screenshotButton.addEventListener('click', () => {
+          // html2canvas에서 제외할 요소를 필터링
+          html2canvas(document.body, {
+            ignoreElements: (element) => (element.id === 'excludeDiv1') || (element.id === 'excludeDiv2') || (element.id === 'excludeDiv3')
+          }).then((canvas) => {
+            // 캔버스를 이미지로 변환
+            const screenshotDataUrl = canvas.toDataURL('image/png');
+
+            // Web Share API가 지원되는지 확인
+            if (navigator.share) {
+              navigator.share({
+                title: '스크린샷 공유',
+                text: '리그 스크린샷을 공유합니다.',
+                files: [
+                  new File([screenshotDataUrlToBlob(screenshotDataUrl)], 'screenshot.png', { type: 'image/png' })
+                ]
+              }).then(() => {
+                console.log('스크린샷 공유 성공');
+              }).catch((error) => {
+                console.error('스크린샷 공유 실패:', error);
+              });
+            } else {
+              // Web Share API가 지원되지 않으면 경고 메시지 표시
+              alert('Web Share API가 지원되지 않습니다. 스크린샷을 저장하려면 이미지로 저장하세요.');
+              
+              // 대체 로직: 이미지 저장 링크 생성
+              const link = document.createElement('a');
+              link.href = screenshotDataUrl;
+              link.download = 'screenshot.png';
+              link.click();
+            }
+          });
+        });
+      } else {
+        console.error('스크린샷 버튼이 존재하지 않습니다.');
+      }
+    });
+
+    // base64 이미지를 Blob으로 변환하는 함수
+    function screenshotDataUrlToBlob(dataUrl) {
+      const byteString = atob(dataUrl.split(',')[1]);
+      const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+      const buffer = new ArrayBuffer(byteString.length);
+      const data = new Uint8Array(buffer);
+
+      for (let i = 0; i < byteString.length; i++) {
+        data[i] = byteString.charCodeAt(i);
+      }
+
+      return new Blob([buffer], { type: mimeString });
+    }
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">비용 계산</h5>
+      </div>
+      <div class="mb-3">
+        <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">뒤로가기</button>
+      </div>
+      <!-- <div class="mb-3">
+        <span style="font-size: smaller;">1 단계 : 리그를 선택합니다.</span>
+        <br>
+        <span style="font-size: smaller;">2 단계 : 리그 진행 장소가 유료/실내 코트인지 확인합니다.</span>
+        <br>
+        <span style="font-size: smaller;">3 단계 : 밥값을 입력합니다.</span>
+        <br>
+        <span style="font-size: smaller;">4 단계 : 밥값에서 제외할 사람을 선택합니다.</span>
+        <br>
+        <span style="font-size: smaller;">5 단계 : 계산하기를 클릭합니다.</span>
+      </div> -->
+      <div class="mb-3">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="mb-3">
+              <div class="mb-2">
+                <strong>1단계: 코트값</strong>
+              </div>
+              <ul class="list-group list-group-flush">
+                <% leagueRankings.forEach((leagueRanking, index) => { %>
+                  <li class="list-group-item">
+                    <div class="row align-items-center">
+                      <div class="col-5">
+                        <strong><%= leagueRanking.name %></strong>
+                      </div>
+                      <div class="col row align-items-center pe-0">
+                        <div class="col-auto pe-0">
+                          <label for="<%= leagueRanking.name %>" class="col-form-label">인당</label>
+                        </div>
+                        <div class="col-6 pe-0">
+                          <input type="number" class="form-control form-control-sm border-warning text-end court-cost" value="" id="<%= leagueRanking.name %>" oninput="addCourtCost();">
+                        </div>
+                        <div class="col-1">
+                          <span>원</span>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- <div class="row">
+                      <div class="col">
+                        <div class="form-check">
+                          
+                          <input class="form-check-input" type="checkbox" value="" id="league<%= index %>" onchange="filterByLeague(this)">
+                          <label class="form-check-label" for="league<%= index %>">
+                            <%= leagueRanking.name %>
+                          </label>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="form-check form-check-inline text-secondary" style="font-size: smaller;">
+                          <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                          <label class="form-check-label" for="flexCheckDefault">
+                            유료/실내
+                          </label>
+                        </div>
+                      </div>
+                    </div> -->
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-3">
+              <div class="mb-1">
+                <strong>2단계: 밥값</strong>
+                &nbsp;
+                <span id="mealSum" value="0">총 0 원</span>
+              </div>
+              <ul class="list-group list-group-flush" id="costList">
+                <li class="list-group-item">
+                  <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                      <label class="col-form-label">1 차</label>
+                    </div>
+                    <div class="col">
+                      <!-- <input type="text" id="cost-1" class="form-control border-warning text-end" oninput="formatCurrency(this)" placeholder="0 원"> -->
+                      <input type="number" class="form-control border-warning text-end meal-cost" id="mealCost1" oninput="calculateSum();">
+                    </div>
+                    <div class="col-1">
+                        <span>원</span>
+                    </div>
+                    <div class="col-1"></div>
+                  </div>
+                </li>
+              </ul>
+              <div class="text-center">
+                <button class="btn btn-warning w-75" onclick="addRow();">차수추가</button>
+              </div>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-3">
+              <div class="mb-1">
+                <strong>3단계: 밥값차</strong>
+              </div>
+              <div>
+                <select class="form-select" aria-label="Default select example" id="paymentDifference">
+                  <option value="1000">1,000 원</option>
+                  <option value="2000">2,000 원</option>
+                  <option value="3000">3,000 원</option>
+                  <option value="4000">4,000 원</option>
+                  <option value="5000">5,000 원</option>
+                </select>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div class="container mb-3">
+          <table class="table table-warning text-center" id="costPlayers" style="font-size: smaller;">
+            <thead>
+              <tr>
+                <th class="bg-white" scope="col">선수</th>
+                <th class="bg-white" scope="col">제외</th>
+                <th class="bg-white" scope="col">코트</th>
+                <th class="bg-white" scope="col">패</th>
+                <th class="bg-white" scope="col">밥</th>
+                <th class="bg-white" scope="col">총</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% moneyRankings.forEach((moneyRanking, index) => { %>
+                <tr>
+                  <td>
+                    <%= moneyRanking.name %>
+                  </td>
+                  <td>
+                    <% if (index == 0) { %>
+                      <span>-</span>
+                    <% } else { %>
+                      <input class="form-check-input exclude-player" type="checkbox" value="">
+                    <% } %>
+                  </td>
+                  <td class="court-payment">
+                    0
+                  </td>
+                  <td class="lose-payment">
+                    <% if (moneyRanking.name.endsWith('G')) { %>
+                      0
+                    <% } else { %>
+                      <%= moneyRanking.losses * 2000 %>
+                    <% } %>
+                  </td>
+                  <td class="meal-payment">
+                    <% if (index == 0) { %>
+                      <span>-</span>
+                    <% } else { %>
+                      0
+                    <% } %>
+                  </td>
+                  <td class="sum-payment">
+                    0
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-warning w-100" onclick=" calculatePayments();">계산하기</button>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <div id="excludeDiv2" class="bg-primary text-white text-center align-content-center screenshot rounded-pill z-3" style="width: 50px; height: 50px;">
+    <img id="screenshotButton" src="/icon/camera.svg" style="width: 60%; height: 60%;" alt="스크린샷" style="cursor: pointer;">
+  </div>
+  <%- include('../../partials/footer.ejs') %>
+  <script>
+    function addCourtCost() {
+      const courtCosts = document.querySelectorAll('.court-cost');
+      const courtPaymentCells = document.querySelectorAll('.court-payment');
+      const moneyRankings = <%- JSON.stringify(moneyRankings) %>;
+      const courtPayments = new Array(moneyRankings.length).fill(0);
+
+      courtPaymentCells.forEach(courtPaymentCell => {
+        courtPaymentCell.textContent = 0;
+      });
+
+      courtCosts.forEach((courtCost, index1) => {
+        courtPaymentCells.forEach((courtPaymentCell, index2) => {
+          if (moneyRankings[index2].league.includes(courtCost.id)) {
+            courtPayments[index2] += (parseInt(courtCost.value) || 0);
+          } else {
+          }
+
+          if (index1 == (courtCosts.length - 1)) {
+            courtPaymentCell.textContent = courtPayments[index2];
+          }
+        });
+      });
+    }
+
+    function filterByLeague(leagueCheck) {
+      const targetLeague = leagueCheck.parentNode.getElementsByTagName('label').textContent;
+
+      if(leagueCheck.checked) {
+        
+      } else {
+
+      }
+    }
+
+    function calculatePayments() {
+      const payments = [];
+      const mealSum = document.getElementById('mealSum').value;
+      const checkboxes = document.querySelectorAll('.exclude-player');
+      const excludePlayers = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+      let playerCount = document.getElementById('costPlayers').getElementsByTagName('tr').length;
+
+      playerCount -= 1; // thead 제외
+      playerCount -= 1; // 1등 제외
+      playerCount -= excludePlayers; // 귀가 제외
+
+      if(mealSum === undefined) {
+        for (let i = 0; i < playerCount; i++) {
+          payments.push(0);
+        }
+      } else {
+        const medianPayment = Math.ceil((mealSum / playerCount) / 100) * 100;
+        const paymentDiff = parseInt(document.getElementById('paymentDifference').value);
+
+        if (playerCount == 2) {
+          let payment = medianPayment - (paymentDiff / 2);
+          payments.push(payment);
+          payment = medianPayment + (paymentDiff / 2);
+          payments.push(payment);
+
+        } else if ((playerCount % 2) == 0) { // 짝수인 경우
+          let payment = medianPayment - 500 - (paymentDiff * ((playerCount / 2) - 1));
+          
+          for (let i = 0; i < playerCount; i++) {
+            payments.push(payment);
+            payment += paymentDiff;
+          }
+        } else { // 홀수인 경우
+          let payment = medianPayment - (paymentDiff * Math.floor(playerCount / 2));
+
+          for (let i = 0; i < playerCount; i++) {
+            payments.push(payment);
+            payment += paymentDiff;
+          }
+        }
+      }
+
+      console.log(payments);
+      updateTable(payments);
+    }
+
+    function updateTable(payments) {
+      const mealPaymentCells = document.querySelectorAll('.meal-payment');
+      const checkboxes = document.querySelectorAll('.exclude-player');
+      const excludePlayers = Array.from(checkboxes);
+
+      console.log(excludePlayers)
+
+      let i = 0;
+
+      mealPaymentCells.forEach((mealPaymentCell, index) => {
+        if (index == 0) {
+
+        } else if (excludePlayers[index - 1].checked) {
+          mealPaymentCell.textContent = 0;
+          mealPaymentCell.value = 0;
+        } else {
+          mealPaymentCell.textContent = payments[i];
+          mealPaymentCell.value = payments[i];
+          i++;
+        }
+      });
+
+      const losePaymentCells = document.querySelectorAll('.lose-payment');
+      const sumPaymentCells = document.querySelectorAll('.sum-payment');
+      const courtPaymentCells = document.querySelectorAll('.court-payment');
+
+      sumPaymentCells.forEach((sumPaymentCell, index) => {
+        const losePay = parseInt(losePaymentCells[index].textContent);
+        const mealPay = parseInt(mealPaymentCells[index].textContent);
+        const courtPay = parseInt(courtPaymentCells[index].textContent)
+
+        if (index == 0) {
+          sumPaymentCell.textContent = losePay + courtPay;
+        } else {
+          sumPaymentCell.textContent = losePay + mealPay  + courtPay;
+        }
+        
+      });
+    }
+    
+    function calculateSum() {
+      const mealSum = document.getElementById('mealSum');
+      const mealCosts = document.querySelectorAll('.meal-cost');
+      let sum = 0;  // sum은 값이 변경되므로 let으로 선언
+
+      mealCosts.forEach((mealCost) => {
+        sum += parseFloat(mealCost.value) || 0;  // mealCost.value를 숫자로 변환하고 값이 없을 경우 0으로 처리
+      });
+
+      mealSum.value = sum;
+      mealSum.innerHTML = `총합 ${sum} 원`;
+    }
+
+    function addRow() {
+      const costList = document.getElementById('costList');
+      const newRow = document.createElement('li');
+      const rowCount = costList.children.length;
+
+      newRow.classList.add('list-group-item');
+      newRow.innerHTML = `
+        <div class="row g-3 align-items-center">
+          <div class="col-auto">
+            <label class="col-form-label" id="costNumber"> ${rowCount + 1} 차</label>
+          </div>
+          <div class="col">
+            <input type="number" class="form-control border-warning text-end meal-cost" id="mealCost${rowCount + 1}" oninput="calculateSum();">
+          </div>
+          <div class="col-1">
+            <span>원</span>
+          </div>
+          <div class="col-1">
+            <img type="button" src="/icon/delete.svg" style="width: 150%; height: 150%;" onclick="deleteRow(this)">
+          </div>
+        </div>
+      `;
+      costList.appendChild(newRow);
+    }
+
+    function deleteRow(button) {
+      var row = button.parentNode.parentNode.parentNode;
+
+      row.parentNode.removeChild(row);
+
+      const costList = document.getElementById('costList');
+      const rows = costList.querySelectorAll('li');
+
+      rows.forEach((row, index) => {
+        if (index == 0) {
+        } else {
+          row.querySelector('label').innerHTML = `${index + 1} 차`;
+          row.querySelector('input').id = `mealCost${index + 1}`;
+        }
+      });
+
+      calculateSum();
+    }
+
+    function formatCurrency(input) {
+            // 현재 커서 위치 저장
+            
+
+            // 숫자만 남기기
+            let value = input.value.replace(/[^0-9]/g, '');
+
+            // 기존 쉼표 개수 확인
+            let originalLength = value.length;
+
+            // 3자리마다 쉼표 추가
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            // 커서 위치 조정
+            let diff = value.length - originalLength;
+
+            // " 원" 추가
+            input.value = value ? value + ' 원' : '';
+
+            // // 새로운 커서 위치 계산 및 설정
+            // cursorPosition += diff;
+            // input.setSelectionRange(cursorPosition, cursorPosition);
+
+            let cursorPosition = input.selectionStart;
+            console.log("커서", cursorPosition)
+            console.log("길이", input.value.length)
+
+            if (cursorPosition > (input.value.length - 3)) {
+              input.setSelectionRange(input.value.length - 2, input.value.length - 2);
+            }
+        }
+</script>
+</body>
+</html>

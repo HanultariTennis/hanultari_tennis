@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원 상세 정보</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .logout {
+      position: fixed;
+      bottom: 15%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+    .manager {
+      position: fixed;
+      bottom: 25%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div style="background-image: url('/path/to/playerBackbround.jpg'); height: 260px; background-size: cover; background-position: center;">
+      <div class="row h-100">
+        <div class="col-6 ms-4 mt-4 z-3">
+          <strong class="text-white fs-1"><%= name %></strong>
+          <br>
+          <strong class="text-white fs-6">rank</strong>
+          <strong class="text-white fs-1"><%= ranking %></strong>
+          <br>
+          <br>
+          <strong class="text-white fs-5">2024</strong>
+          <br>
+          <strong class="text-primary fs-1"><%= win %></strong>
+          <strong class="text-white fs-6">승</strong>
+          <strong class="text-danger fs-1"><%= lose %></strong>
+          <strong class="text-white fs-6">패</strong>
+          <strong class="text-warning-emphasis fs-6">(<%= winRate %>%)</strong>
+          <br>
+          <strong class="text-white fs-6">4승</strong>
+          <strong class="text-warning-emphasis fs-1"><%= fourWins %></strong>
+          <strong class="text-white fs-6">번</strong>
+        </div>
+        <div class="col h-100" style="display: flex; justify-content: flex-start; align-items: flex-end;">
+          <img src="/path/to/박민규4.png" style="height: 90%; width: auto;" alt="<%= name %>">
+        </div>
+        
+      </div>
+    </div>
+    <div class="container">
+      <div class="mb-3">
+        <ul class="nav nav-underline justify-content-between ms-5 me-5 " id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active text-warning" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="false">정보</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link text-warning" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent-tab-pane" type="button" role="tab" aria-controls="recent-tab-pane" aria-selected="true">최근</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link text-warning" id="tournament-tab" data-bs-toggle="tab" data-bs-target="#tournament-tab-pane" type="button" role="tab" aria-controls="tournament-tab-pane" aria-selected="false">대회</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link text-warning" id="statistic-tab" data-bs-toggle="tab" data-bs-target="#statistic-tab-pane" type="button" role="tab" aria-controls="statistic-tab-pane" aria-selected="false">통계</button>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab" tabindex="1">
+          <table class="table">
+            <thead></thead>
+            <tbody>
+              <tr>
+                <th scope="row">출생년도</th>
+                <td><%= birth.substring(0, 4) %> 년</td>
+              </tr>
+              <tr>
+                <th scope="row">가입년도</th>
+                <td><%= join.substring(0, 4) %> 년</td>
+              </tr>
+              <tr>
+                <th scope="row">전화번호</th>
+                <td><%= phone %></td>
+              </tr>
+              <tr>
+                <th scope="row">플레이</th>
+                <td><%= plays %></td>
+              </tr>
+              <tr>
+                <th scope="row">라켓</th>
+                <td><%= racquet %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="recent-tab-pane" role="tabpanel" aria-labelledby="recent-tab" tabindex="2">
+          <table class="table text-center">
+            <thead>
+              <tr>
+                <th scope="col">날짜</th>
+                <th scope="col">파트너</th>
+                <th scope="col">상대팀</th>
+                <th scope="col">점수</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentMatch.forEach(match => { %>
+                <tr>
+                  <th scope="row"><%= match.date %></th>
+                  <% if (name === match.winAddPlayer) { %>
+                    <td><%= match.winDeucePlayer %></td>
+                    <td><%= match.loseAddPlayer %> <%= match.loseDeucePlayer %></td>
+                    <td><%= match.winScore %>:<%= match.loseScore %> 승</td>
+                  <% } else if (name === match.winDeucePlayer) { %>
+                    <td><%= match.winAddPlayer %></td>
+                    <td><%= match.loseAddPlayer %> <%= match.loseDeucePlayer %></td>
+                    <td><%= match.winScore %>:<%= match.loseScore %> 승</td>
+                  <% } else if (name === match.loseAddPlayer) { %>
+                    <td><%= match.loseDeucePlayer %></td>
+                    <td><%= match.winAddPlayer %> <%= match.winDeucePlayer %></td>
+                    <td><%= match.loseScore %>:<%= match.winScore %> 패</td>
+                  <% } else if (name === match.loseDeucePlayer) { %>
+                    <td><%= match.loseAddPlayer %></td>
+                    <td><%= match.winAddPlayer %> <%= match.winDeucePlayer %></td>
+                    <td><%= match.loseScore %>:<%= match.winScore %> 패</td>
+                  <% } %>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="tournament-tab-pane" role="tabpanel" aria-labelledby="tournament-tab" tabindex="3">
+          <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">시즌</label>
+            <select class="form-select border-warning" aria-label="Default select example">
+              <option selected value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </select>
+          </div>
+          <table class="table text-center">
+            <thead>
+              <tr>
+                <th scope="col">날짜</th>
+                <th scope="col">대회명</th>
+                <th scope="col">성적</th>
+                <th scope="col">파트너</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% tours.forEach(tour => { %>
+                <tr>
+                  <th scope="row"><%= tour.date %></th>
+                  <td style="width: 45%;"><%= tour.name %></td>
+                  <td><%= tour.result %></td>
+                  <td><%= tour.partner %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="statistic-tab-pane" role="tabpanel" aria-labelledby="statistic-tab" tabindex="4">
+          <div>
+            <div class="mb-3">
+              <label for="exampleFormControlInput1" class="form-label">시즌</label>
+              <select class="form-select border-warning" aria-label="Default select example">
+                <option selected value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+              </select>
+            </div>
+            <div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <span>베스트 포지션</span>
+                  &nbsp
+                  <strong>개발 중</strong>
+                </li>
+                <li class="list-group-item">
+                  <span>베스트 승수 파트너</span>
+                  &nbsp
+                  <% if (!bestWinPartner) { %>
+                    <strong>-</strong>
+                  <% } else { %>
+                    <strong><%= bestWinPartner.name %></strong>
+                    <strong><%= bestWinPartner.win %>승</strong>
+                    <strong><%= bestWinPartner.lose %>패</strong>
+                    <strong><%= bestWinPartner.winRate %>%</strong>
+                  <% } %>
+                </li>
+                <li class="list-group-item">
+                  <span>베스트 승률 파트너</span>
+                  &nbsp
+                  <% if (!bestWinRatePartner) { %>
+                    <strong>-</strong>
+                  <% } else { %>
+                    <strong><%= bestWinRatePartner.name %></strong>
+                    <strong><%= bestWinRatePartner.win %>승</strong>
+                    <strong><%= bestWinRatePartner.lose %>패</strong>
+                    <strong><%= bestWinRatePartner.winRate %>%</strong>
+                  <% } %>
+                </li>
+                <li class="list-group-item">
+                  <table class="table text-center">
+                    <thead>
+                      <tr>
+                        <th scope="col">항목</th>
+                        <th scope="col">승</th>
+                        <th scope="col">패</th>
+                        <th scope="col">승률</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="fw-bold border-top border-warning">
+                        <th scope="row" class="">통산</th>
+                        <td class="bg-danger-subtle"><%= records.win %></td>
+                        <td class="bg-danger-subtle"><%= records.lose %></td>
+                        <td class="bg-danger-subtle"><%= records.winRate %>%</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" class="bg-success-subtle">인조잔디</th>
+                        <td><%= records.grassWin %></td>
+                        <td><%= records.grassLose %></td>
+                        <td><%= records.grassWinRate %>%</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" class="bg-primary-subtle">하드</th>
+                        <td><%= records.hardWin %></td>
+                        <td><%= records.hardLose %></td>
+                        <td><%= records.hardWinRate %>%</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" class="bg-warning-subtle">클레이</th>
+                        <td><%= records.clayWin %></td>
+                        <td><%= records.clayLose %></td>
+                        <td><%= records.clayWinRate %>%</td>
+                      </tr>
+                      <tr class="border-top border-warning">
+                        <th scope="row" class="bg-info-subtle">카펫</th>
+                        <td><%= records.carpetWin %></td>
+                        <td><%= records.carpetLose %></td>
+                        <td><%= records.carpetWinRate %>%</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" class="bg-secondary-subtle">듀스코트</th>
+                        <td><%= records.deuceWin %></td>
+                        <td><%= records.deuceLose %></td>
+                        <td><%= records.deuceWinRate %>%</td>
+                      </tr>
+                      <tr>
+                        <th scope="row" class="bg-secondary-subtle">애드코트</th>
+                        <td><%= records.addWin %></td>
+                        <td><%= records.addLose %></td>
+                        <td><%= records.addWinRate %>%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+              </ul>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="height: 100px;"></div>
+  </main>
+  <% if (userName == name) { %>
+    <div class="bg-danger text-white text-center align-content-center logout rounded-pill z-3" style="width: 50px; height: 50px;">
+      <a href="/logout">
+        <img src="/icon/logout.svg" style="width: 60%; height: 60%;">
+      </a>
+    </div>
+  <% } else { %>
+    
+  <% } %>
+  
+  <% if ( (userName == name) && ((userRole == '관리자') || (userRole == '회장') || (userRole == '부회장'))) { %>
+    <div class="bg-primary text-white text-center align-content-center manager rounded-pill" style="width: 50px; height: 50px; z-index: 1000;">
+      <a href="/admin">
+        <img src="/icon/manager.svg" class="w-75 h-75">
+      </a>
+    </div>
+  <% } else { %>
+    
+  <% } %>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

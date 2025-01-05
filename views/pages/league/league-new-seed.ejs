@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리그 생성 - 시드 배정</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script>
+      function updateSeedCount() {
+          const people = <%= selectedPlayers.length %>;
+          const maxSeeds = <%- maxSeeds %>;
+          const seedCheckboxes = document.querySelectorAll('input[type="checkbox"][name^="seeds"]');
+          let selectedSeeds = 0;
+
+          seedCheckboxes.forEach(checkbox => {
+              if (checkbox.checked) selectedSeeds++;
+          });
+
+          seedCheckboxes.forEach(checkbox => {
+              if (!checkbox.checked) {
+                  checkbox.disabled = selectedSeeds >= maxSeeds;
+              }
+          });
+          document.getElementById('stats').textContent = `총원 ${people} 명 / 최대시드 ${maxSeeds} 명 / 선택시드 ${selectedSeeds} 명`;
+          // document.getElementById('seed-count').textContent = `최대 시드 개수: ${maxSeeds}`;
+          // document.getElementById('selected-seeds').textContent = `선택된 시드 개수: ${selectedSeeds}`;
+      }
+
+      function validateSeedCount(event) {
+          const maxSeeds = <%= maxSeeds %>;
+          const selectedSeeds = document.querySelectorAll('input[type="checkbox"][name^="seeds"]:checked').length;
+
+          if (selectedSeeds > maxSeeds) {
+              alert('시드 개수를 확인하세요.');
+              event.preventDefault();
+          }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+          updateSeedCount();
+          document.querySelectorAll('input[type="checkbox"][name^="seeds"]').forEach(checkbox => {
+              checkbox.addEventListener('change', updateSeedCount);
+          });
+          document.getElementById('seedForm').addEventListener('submit', validateSeedCount);
+      });
+
+      function getSeedData() {
+        const rows = document.querySelectorAll('#sortable-table tbody tr');
+        const data = [];
+
+        rows.forEach((row) => {
+            const seedText = row.querySelector('th').textContent;
+            const name = row.querySelector('td').textContent;
+            const type = name.endsWith('G') ? '게스트' : '회원';
+
+            data.push({
+                name: name,
+                type: type,
+                seed: seedText
+            });
+        });
+
+        document.getElementById('newSeed').value = JSON.stringify(data);
+      }
+    </script>
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center mb-3">리그생성</h5>
+
+      <div class="d-flex mt-3 mb-3 justify-content-between">
+        <div class="stepper-item completed">
+          <div class="step-counter">1</div>
+          <div class="step-name">기본정보</div>
+        </div>
+        <div class="stepper-item completed">
+          <div class="step-counter">2</div>
+          <div class="step-name">참가자</div>
+        </div>
+        <div class="stepper-item completed">
+          <div class="step-counter">3</div>
+          <div class="step-name">시드</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">4</div>
+          <div class="step-name">확정</div>
+        </div>
+      </div>
+      <form id="seedForm2" action="/league/new/seed" method="POST">
+        <% if (selectedPlayers.length === 12) { %>
+          <div class="container mb-3">
+            <label class="form-label">총원이 12명입니다. 코트 개수를 지정해주세요.</label>
+            <div class="btn-group w-100" role="group" aria-label="Basic radio toggle button group">
+              <input type="radio" class="btn-check" name="courtCount" id="btnradio1" autocomplete="off" value="2" checked>
+              <label class="btn btn-outline-warning" for="btnradio1">2개</label>
+
+              <input type="radio" class="btn-check" name="courtCount" id="btnradio2" autocomplete="off" value="3">
+              <label class="btn btn-outline-warning" for="btnradio2">3개</label>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="container mb-5">
+          <h6>드래그해서 시드를 지정하세요.</h6>
+          <table class="table w-75 text-center" id="sortable-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>이름</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% for (var index = 0; index < people; index++) { %>
+                <tr style="height: 50px;">
+                  <th scope="row"><%= index + 1 %></th>
+                  <td><%= selectedPlayers[index].name %></td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <input type="hidden" id="newSeed" name="newSeed" value="">
+        <div class="container d-flex justify-content-center">
+          <button type="submit" class="btn btn-warning w-50" onclick="getSeedData()">다음단계</button>
+          <div class="ms-1 me-1"></div>
+          <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+        </div>
+      </form>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer') %>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+  <script>
+    function updateRowNumbersAndColors() {
+        const rows = document.querySelectorAll('#sortable-table tbody tr');
+        const maxSeeds = <%= maxSeeds %>;
+
+        rows.forEach((row, index) => {
+            // Update row color
+            if (index < maxSeeds) {
+                row.classList.add('table-warning');
+                row.querySelector('th').textContent = '시드' + (index + 1);
+            } else {
+                row.classList.remove('table-warning');
+                row.querySelector('th').textContent = '선수' + (index + 1 - maxSeeds);
+            }
+        });
+    }
+
+    // Initialize sortable with the update callback
+    new Sortable(document.querySelector('#sortable-table tbody'), {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function(evt) {
+            updateRowNumbersAndColors(); // Update row numbers and colors after drag and drop
+        }
+    });
+
+    // Initial update of row numbers and colors
+    updateRowNumbersAndColors();
+  </script>
+</body>
+</html>

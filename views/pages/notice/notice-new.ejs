@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>새 글 작성</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container mt-3">
+      <form id="board-form" action="/notice/new" method="POST">
+        <input type="hidden" id="date" name="newDate" required>
+        <input type="hidden" id="author" name="newAuthor" value="<%= userName %>" required>
+        <div class="d-flex justify-content-center mb-3">
+          <button type="submit" class="btn btn-warning w-50" onclick="checkValidity()">등록</button>
+          <div class="ms-1 me-1"></div>
+          <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+        </div>
+        <div class="mb-3 border-bottom">
+          <select class="form-select border-white text-secondary" name="boardSelect" id="board-select" aria-label="Default select example">
+            <option selected value="게시판 선택">게시판 선택</option>
+            <% if ((userRole == '관리자') || (userRole == '회장') || (userRole == '부회장') || (userRole == '총무')) { %>
+              <option value="공지사항">공지사항</option>
+            <% } %>
+            <option value="자유게시판">자유게시판</option>
+          </select>
+        </div>
+        <div class="mb-3 border-bottom">
+          <input type="text" class="form-control border-white fs-3" id="board-summary" name="newSummary" placeholder="제목을 입력해주세요.">
+        </div>
+        <div class="mb-3 border-bottom">
+          <textarea type="text" class="form-control border-white" rows="20" id="board-contents" name="newContents" placeholder="내용을 입력해주세요."></textarea>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer') %>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var today = new Date().toISOString().substr(0, 10);
+        document.getElementById("date").value = today;
+    });
+
+    document.getElementById('board-form').addEventListener('submit', function(e) {
+      const boardSelect = document.getElementById('board-select').value;
+      const boardsummary = document.getElementById('board-summary').value;
+      const boardContents = document.getElementById('board-contents').value;
+      const date = document.getElementById('date').value;
+      console.log('날짜');
+      console.log(date);
+      console.log(Date());
+
+      if (boardSelect == "게시판 선택") {
+        alert('게시판을 선택해주세요!');
+        e.preventDefault();
+      } else if (!boardsummary) {
+        alert('제목을 입력해주세요!');
+        e.preventDefault();
+      } else if (boardsummary.length > 100) {
+        alert('제목은 100자 이내이어야 해요!');
+        e.preventDefault();
+      } else if (!boardContents) {
+        alert('내용을 입력해주세요!');
+        e.preventDefault();
+      } else if (boardContents.length > 1000) {
+        alert('내용은 1000자 이내이어야 해요!');
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

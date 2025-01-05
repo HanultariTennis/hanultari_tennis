@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리 - 로그인</title>
+  <link rel="apple-touch-icon" href="../../path/to/180.png">
+  <style>
+    /* 이미지가 전체화면을 차지하도록 설정 */
+    #fullscreen-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        /* height: 100%; */
+        background-color: black; /* 이미지 로딩 전의 배경색 */
+        display: none; /* 처음에는 이미지를 보이지 않게 설정 */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* 가장 앞에 표시되도록 설정 */
+    }
+
+    #fullscreen-image img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <div id="fullscreen-image">
+    <img class="z-3" src="/path/to/시작화면3.jpg" alt="Fullscreen Image">
+  </div>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center">한울타리 테니스 클럽</h5>
+      <form id="loginForm" action="/login" method="POST">
+        <div class="mb-2">
+          <label for="username" class="form-label">아이디</label>
+          <% if (prevUsername && (whatIsWrong == 'wrongUsername')) { %>
+            <input type="text" class="form-control is-invalid" name="username" id="username" value="<%= prevUsername %>" placeholder="이름을 입력하세요." required>
+            <div class="invalid-feedback">
+              아이디를 확인하세요!
+            </div>
+          <% } else if (prevUsername && (whatIsWrong != 'wrongUsername')) { %>
+            <input type="text" class="form-control" name="username" id="username" value="<%= prevUsername %>" placeholder="이름을 입력하세요." required>
+          <% } else { %>
+            <input type="text" class="form-control" name="username" id="username" placeholder="이름을 입력하세요." required>
+          <% } %>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">비밀번호</label>
+          <% if (prevPassword && (whatIsWrong == 'wrongPassword')) { %>
+            <input type="text" class="form-control is-invalid" name="password" id="password" value="<%= prevPassword %>" placeholder="전화번호 뒷 네 자리를 입력하세요." required>
+            <div class="invalid-feedback">
+              비밀번호를 확인하세요!
+            </div>
+          <% } else if (prevPassword && (whatIsWrong != 'wrongPassword')) { %>
+            <input type="text" class="form-control" name="password" id="password" value="<%= prevPassword %>" placeholder="전화번호 뒷 네 자리를 입력하세요." required>
+          <% } else { %>
+            <input type="text" class="form-control" name="password" id="password" placeholder="전화번호 뒷 네 자리를 입력하세요." required>
+          <% } %>
+        </div>
+        <div class="form-check mb-5">
+          <input class="form-check-input" type="checkbox" value="" id="remember">
+          <label class="form-check-label" for="remember">
+            로그인 유지
+          </label>
+        </div>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-warning w-100 fw-bold text-white">로그인</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <script>
+    // 페이지가 로드된 후 이미지가 전체화면으로 표시되도록 설정
+    window.onload = function() {
+      const prevUsername = document.getElementById('username').value;
+      const prevPassword = document.getElementById('password').value;
+      if(prevUsername && prevPassword) {
+
+      } else {
+        const fullscreenImage = document.getElementById('fullscreen-image');
+        fullscreenImage.style.display = 'flex'; // 이미지를 표시
+        setTimeout(function() {
+          fullscreenImage.style.display = 'none'; // 2초 후 이미지를 숨김
+        }, 1000);
+      }
+    };
+</script>
+</body>
+</html>

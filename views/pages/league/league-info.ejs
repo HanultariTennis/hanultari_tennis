@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="apple-touch-icon" href="../../path/to/180.png">
+  <style>
+  </style>
+</head>
+<body>
+  <main>
+    <%- include('../../partials/header.ejs') %>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center"><%= league.name %> 정보</h5>
+      </div>
+      <div class="mb-3">
+        <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">뒤로가기</button>
+      </div>
+      <div class="mb-3">
+        <ul class="list-group list-group-flush text-start">
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>방식</span>
+              &nbsp;
+              <strong><%= league.format %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>유형</span>
+              &nbsp;
+              <strong><%= league.type %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>장소</span>
+              &nbsp;
+              <strong><%= league.court %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>날짜</span>
+              &nbsp;
+              <strong><%= league.date.replace(/-/g, '.') %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>진행자</span>
+              &nbsp;
+              <strong><%= league.manager %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>참가자</span>
+              &nbsp;
+              <strong><%= league.people %> 명</strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>시드</span>
+              &nbsp;
+              <strong><%= league.seedPeople %> 명</strong>
+              <% if (league.seedPeople != 0) { %>
+                <br>
+                <br>
+                <% league.players.filter(player => player.seed.startsWith('시드')).forEach(function(player, index) { %>
+                  <strong><%= player.name %></strong>
+                <% }); %>
+              <% } %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>비시드</span>
+              &nbsp;
+              <strong><%= league.noSeedPeople %> 명</strong>
+              <br>
+              <br>
+              <% league.players.filter(player => player.seed.startsWith('선수')).forEach(function(player, index) { %>
+                <strong><%= player.name %></strong>
+              <% }); %>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div style="height: 100px;"></div>
+    </div> 
+  </main>
+  <script>
+  </script>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

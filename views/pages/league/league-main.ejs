@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리 - 리그</title>
+  <link rel="apple-touch-icon" href="../../path/to/180.png">
+  <style>
+    .hidden {
+      display: none;
+    }
+    .add {
+      position: fixed;
+      bottom: 15%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+    .money {
+      position: fixed;
+      bottom: 25%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <%- include('../../partials/header.ejs') %>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">리그</h5>
+      </div>
+      <!-- <div>
+        <div class="d-flex justify-content-center mb-3">
+          <a type="button" href="/league/meal" class="btn btn-warning w-100">밥값계산</a>
+        </div>
+      </div> -->
+      <div class="mb-3">
+        <% if (leagues.length === 0) { %>
+          <div class="text-center">
+            <strong>진행 중인 리그가 없습니다.</strong>
+          </div>
+        <% } %>
+        <ul class="list-group">
+          <% leagues.forEach(function(league, leagueIndex) { %>
+            <li class="list-group-item list-group-item-warning">
+              <h6 class="flex-fill fw-bold text-danger"><%= league.name %> <%= league.format %> <%= league.court %></h6>
+              <div class="row">
+                <div class="col">
+                  <strong>진행률</strong>
+                </div>
+                <div class="col-9">
+                  <% let matchProgress = 0; %>
+                  <% league.matches.forEach(function(match, matchIndex) { %>
+                    <% if (match.score) { %>
+                      <% matchProgress++; %>
+                    <% } %>
+                  <% }) %>
+                  <% const matchPercent = Math.round((matchProgress / league.matches.length) * 100); %>
+                  <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-black" style="width: <%= matchPercent %>%">
+                      <%= matchPercent %> %
+                    </div>
+                    <% if (matchPercent == 0) { %>
+                      <div class="m-auto">0 %</div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col">
+                  <strong>참가자</strong>
+                </div>
+                <div class="col-9" style="white-space: normal; overflow-wrap: break-word; word-wrap: break-word;">
+                  <% for (var i = 0; i < league.people; i++) { %>
+                    <% if (league.players[i].seed.startsWith('시드')) { %>
+                      <span class="text-primary fw-bold" style="display: inline-block; margin-right: 5px;"><%= league.players[i].name %></span>
+                    <% } %>
+                  <% } %>
+                  <% for (var i = 0; i < league.people; i++) { %>
+                    <% if (league.players[i].seed.startsWith('선수')) { %>
+                      <span style="display: inline-block; margin-right: 5px;"><%= league.players[i].name %></span>
+                    <% } %>
+                  <% } %>
+                </div>
+              </div>
+              <a type="button" class="btn btn-warning w-100" href="/league/detail?leagueIndex=<%= leagueIndex %>">리그입장</a>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+      
+        
+      
+
+
+
+
+      <!-- <% leagues.forEach(function(league, leagueIndex) { %>
+        <div class="border border-warning border-2 rounded-3 m-1 bg-warning bg-opacity-25 mt-3">
+          <div class="d-flex m-2">
+            <h6 class="flex-fill fw-bold"><%= league.name %> <%= league.format %> <%= league.court %></h6>
+            <button class="btn btn-warning btn-sm flex-fill" onclick="toggleLeagueDetails(<%= leagueIndex %>)">펼치기</button>
+          </div>
+          <div id="league-details-<%= leagueIndex %>" class="hidden">
+            <div class="btn-group m-2 d-flex justify-content-center" role="group" aria-label="Basic outlined example">
+              <a href="/league/ranking?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75 fs-6">순위결과</a>
+              <a href="/league/snack?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">간식점수</a>
+              <a href="/league/edit?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">리그변경</a>
+              <a href="/league/end?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">리그종료</a>
+            </div>
+            <% league.matches.forEach(function(match, matchIndex) { %>
+              <div class="contianer bg-warning bg-opacity-50 rounded-3 border-2 m-2">
+                <div class=" m-1">
+                  <div>매치 <%= matchIndex + 1 %>번 – <%= league.court %></div>
+                </div>
+                <div class="row">
+                  <div class="col ms-2">
+                    <div class="container border border-warning rounded-3 bg-warning bg-opacity-50 text-center fs-5 fw-bold text-white d-flex align-items-center justify-content-center <%= match.score && parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'winner highlight' : '' %>" style="height: 90%;">
+                      <div>
+                        <% const team1Player1 = league.players.find(function(p) { return p.name === match.team1[0]; }); %>
+                        <% const team1Player2 = league.players.find(function(p) { return p.name === match.team1[1]; }); %>
+                        <% if (team1Player1.seed == true) { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team1Player1.name %>(s)</div>
+                        <% } else { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team1Player1.name %></div>
+                        <% } %>
+                        <% if (team1Player2.seed == true) { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team1Player2.name %>(s)</div>
+                        <% } else { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team1Player2.name %></div>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-2 w-25 text-center">
+                    <% if (match.score) { %>
+                      <span style="<%= parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'color: blue; font-size: 1.5em;' : '' %>"><%= match.score.split(':')[0] %></span> :
+                      <span style="<%= parseInt(match.score.split(':')[1]) > parseInt(match.score.split(':')[0]) ? 'color: blue; font-size: 1.5em;' : '' %>"><%= match.score.split(':')[1] %></span>
+                    <% } else { %>
+                      진행 중
+                    <% } %>
+                    <a href="league/score?leagueIndex=<%= leagueIndex %>&matchIndex=<%= matchIndex %>" class="btn btn-warning btn-sm m-1 mb-2">입력</a>
+                  </div>
+                  <div class="col me-2">
+                    <div class="container border border-success rounded-3 bg-warning bg-opacity-50 text-center fs-5 fw-bold text-white d-flex align-items-center justify-content-center <%= match.score && parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'winner highlight' : '' %>" style="height: 90%;">
+                      <div>
+                        <% const team2Player1 = league.players.find(function(p) { return p.name === match.team2[0]; }); %>
+                        <% const team2Player2 = league.players.find(function(p) { return p.name === match.team2[1]; }); %>
+                        <% if (team2Player1.seed == true) { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team2Player1.name %>(s)</div>
+                        <% } else { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team2Player1.name %></div>
+                        <% } %>
+                        <% if (team2Player2.seed == true) { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team2Player2.name %>(s)</div>
+                        <% } else { %>
+                          <div class="h-auto fs-6 fw-bold"><%= team2Player2.name %></div>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% }) %> -->
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <script>
+    function toggleLeagueDetails(index) {
+      const details = document.getElementById(`league-details-${index}`);
+      const button = document.querySelector(`.btn[onclick="toggleLeagueDetails(${index})"]`);
+      if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        button.textContent = '접기';
+      } else {
+        details.classList.add('hidden');
+        button.textContent = '펼치기';
+      }
+    }
+
+    // 페이지 로드 시 모든 리그 세부 사항을 숨김
+    document.addEventListener('DOMContentLoaded', function() {
+      const details = document.querySelectorAll('[id^="league-details-"]');
+      details.forEach(detail => detail.classList.add('hidden'));
+      const buttons = document.querySelectorAll('.toggle-button');
+      buttons.forEach(button => button.textContent = '펼치기');
+    });
+  </script>
+  <div class="bg-success text-white text-center align-content-center money rounded-pill z-3" style="width: 50px; height: 50px;">
+    <a href="/league/meal">
+      <img src="/icon/money.svg" style="width: 60%; height: 60%;">
+    </a>
+  </div>
+  <div class="bg-warning text-white text-center align-content-center add rounded-pill z-3" style="width: 50px; height: 50px;">
+    <a href="/league/new/info">
+      <img src="/icon/add.svg" style="width: 60%; height: 60%;">
+    </a>
+  </div>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

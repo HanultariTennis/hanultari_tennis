@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리그순위</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center mb-3"><%= league.name %> 순위</h5>
+      <div class="container mb-5">
+        <!-- <table class="table table-warning text-center">
+          <thead>
+            <tr>
+              <th class="bg-white" scope="col">#</th>
+              <th class="bg-white" scope="col">선수</th>
+              <th class="bg-white" scope="col">승</th>
+              <th class="bg-white" scope="col">패</th>
+              <th class="bg-white" scope="col">총득</th>
+              <th class="bg-white" scope="col">총실</th>
+              <th class="bg-white" scope="col">득실차</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% players.forEach(function(player, index) { %>
+              <tr>
+                <th scope="row"><%= player.rank %></th>
+                <td>
+                  <% if (player.seed == true) { %>
+                    <p><%= player.name %>(S)</p>
+                  <% } else { %>
+                    <p><%= player.name %></p>
+                  <% } %>
+                </td>
+                <td class="text-primary fw-bold"><%= player.wins %></td>
+                <td class="text-danger fw-bold"><%= player.losses %></td>
+                <td><%= player.totalScore %></td>
+                <td><%= player.totalLostScore %></td>
+                <td><%= player.totalScore - player.totalLostScore %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table> -->
+        <table class="table table-warning text-center">
+          <thead>
+            <tr>
+              <th class="bg-white">#</th>
+              <th class="bg-white">선수</th>
+              <th class="bg-white">승</th>
+              <th class="bg-white">패</th>
+              <th class="bg-white">총득</th>
+              <th class="bg-white">총실</th>
+              <th class="bg-white">득실</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rankingTest.forEach((ranking, index) => { %>
+              <tr>
+                <th scope="row"><%= index + 1 %></th>
+                <td>
+                  <% const playerSeed = players.find(player => player.name == ranking.name).seed %>
+                  <% if (playerSeed.startsWith('시드')) { %>
+                    <p><%= ranking.name %>(S)</p>
+                  <% } else { %>
+                    <p><%= ranking.name %></p>
+                  <% } %>
+                </td>
+                <td class="text-primary fw-bold"><%= ranking.wins %></td>
+                <td class="text-danger fw-bold"><%= ranking.losses %></td>
+                <td><%= ranking.winGames %></td>
+                <td><%= ranking.loseGames %></td>
+                <td><%= ranking.gapWinLoss %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class=" container d-flex justify-content-center">
+        <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">뒤로가기</button>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+    <%- include('../../partials/footer.ejs') %>
+  </main>
+</body>
+</html>

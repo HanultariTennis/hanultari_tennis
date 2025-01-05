@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리그생성 - 자유매치</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('matchForm').addEventListener('submit', function(event) {
+
+                submitForm(event);
+                // const rows = document.querySelectorAll('tbody tr');
+                // let hasDuplicate = false;
+
+                // rows.forEach(row => {
+                //     const team1Selections = Array.from(row.querySelectorAll('select[name="team1"]')).map(select => select.value);
+                //     const team2Selections = Array.from(row.querySelectorAll('select[name="team2"]')).map(select => select.value);
+                    
+                //     // Check for duplicate values within team1 and team2
+                //     const team1UniqueValues = new Set(team1Selections);
+                //     const team2UniqueValues = new Set(team2Selections);
+
+                //     if (team1UniqueValues.size !== team1Selections.length || team2UniqueValues.size !== team2Selections.length) {
+                //         hasDuplicate = true;
+                //     }
+                // });
+
+                // if (hasDuplicate) {
+                //     alert('1 개 매치에 같은 사람이 배정됐습니다.');
+                //     event.preventDefault();
+                // } else {
+                //     // Collect data and send in desired format
+                //     const matches = [];
+                //     rows.forEach(row => {
+                //         const team1 = Array.from(row.querySelectorAll('select[name="team1"]')).map(select => select.value);
+                //         const team2 = Array.from(row.querySelectorAll('select[name="team2"]')).map(select => select.value);
+                //         matches.push({ team1, team2 });
+                //     });
+
+                //     // You can send matches as a hidden input or use AJAX to send it
+                //     // Example: Add hidden input field
+                //     const matchesInput = document.createElement('input');
+                //     matchesInput.type = 'hidden';
+                //     matchesInput.name = 'matches';
+                //     matchesInput.value = JSON.stringify(matches);
+                //     document.getElementById('matchForm').appendChild(matchesInput);
+                // }
+            });
+        });
+
+        function addMatchRow() {
+            var table = document.getElementById("matchTableBody");
+            var rowCount = table.rows.length;
+            var row = table.insertRow(rowCount);
+
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+
+            cell1.innerHTML = `
+                <strong>
+                    ${rowCount + 1}
+                </strong>
+                <br>
+                <i class="bi bi-x-circle-fill text-danger" onclick="deleteMatchRow(this)"></i>`;
+
+            cell2.innerHTML = `
+                <div class="mb-2">
+                    <select class="form-select form-select-sm w-75 mb-1" name="matches[${rowCount}][team1][]">
+                        <% selectedPlayers.forEach(function(player) { %>
+                            <option value="<%= player.name %>"><%= player.name %></option>
+                        <% }) %>
+                    </select>
+                    <select class="form-select form-select-sm w-75" name="matches[${rowCount}][team1][]">
+                        <% selectedPlayers.forEach(function(player) { %>
+                            <option value="<%= player.name %>"><%= player.name %></option>
+                        <% }) %>
+                    </select>
+                </div>`;
+            cell3.innerHTML = `
+                <div class="mb-2">
+                    <select class="form-select form-select-sm w-75 mb-1" name="matches[${rowCount}][team2][]">
+                        <% selectedPlayers.forEach(function(player) { %>
+                            <option value="<%= player.name %>"><%= player.name %></option>
+                        <% }) %>
+                    </select>
+                    <select class="form-select form-select-sm w-75" name="matches[${rowCount}][team2][]">
+                        <% selectedPlayers.forEach(function(player) { %>
+                            <option value="<%= player.name %>"><%= player.name %></option>
+                        <% }) %>
+                    </select>
+                </div>`;
+        }
+
+        function deleteMatchRow(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+
+            // 매치 번호를 업데이트
+            var table = document.getElementById("matchTableBody");
+
+            for (var i = 0; i < table.rows.length; i++) {
+                var currentRow = table.rows[i];
+
+                currentRow.cells[0].innerHTML = `
+                        <strong>
+                            ${i + 1}
+                        </strong>
+                        <br>
+                        <i class="bi bi-x-circle-fill text-danger" onclick="deleteMatchRow(this)"></i>`;
+                
+                // name 속성 업데이트
+                table.rows[i].cells[1].querySelectorAll("select[name^='matches']").forEach(function(select, index) {
+                    select.name = `matches[${i}][team1][${index}]`;
+                });
+                table.rows[i].cells[2].querySelectorAll("select[name^='matches']").forEach(function(select, index) {
+                    select.name = `matches[${i}][team2][${index}]`;
+                });
+            }
+        }
+
+        function submitForm(event) {
+            var table = document.getElementById("matchTableBody");
+            var matches = [];
+            var hasDuplicate = false;
+
+            for(var i = 0; i < table.rows.length; i++) {
+                var currentRow = table.rows[i];
+
+                var team1Selects = currentRow.cells[1].querySelectorAll("select");
+                var team2Selects = currentRow.cells[2].querySelectorAll("select");
+
+                var team1 = Array.from(team1Selects).map(select => select.value);
+                var team2 = Array.from(team2Selects).map(select => select.value);
+
+                // 중복 검사
+                var allPlayers = team1.concat(team2);
+                var uniquePlayers = new Set(allPlayers);
+
+                if (uniquePlayers.size !== allPlayers.length) {
+                    hasDuplicate = true;
+                    break;
+                }
+
+                matches.push({
+                    team1: team1,
+                    team2: team2,
+                });
+            }
+
+            if (hasDuplicate) {
+                alert('1 개 매치에 같은 사람이 배정됐습니다.');
+                event.preventDefault();
+            } else {
+                var matchesJson = JSON.stringify(matches);
+                document.getElementById("newMatches").value = matchesJson;
+                document.getElementById("matchForm").submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <%- include('../../partials/header') %>
+    <main>
+        <div class="container mt-3">
+            <h2 class="d-flex justify-content-center mb-5">리그생성 자유매치</h2>
+            <form id="matchForm" action="/league/new/self" method="POST">
+                <input type="hidden" id="newMatches" name="newMatches" value="">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>팀1</th>
+                            <th>팀2</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matchTableBody">
+                        <% for(var i = 0; i < people; i++) { %>
+                            <tr>
+                                <td>
+                                    <strong><%= i + 1 %></strong>
+                                    <br>
+                                    <i class="bi bi-x-circle-fill text-danger" onclick="deleteMatchRow(this)"></i>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm w-75 mb-1" name="matches[<%= i %>][team1][]">
+                                            <% selectedPlayers.forEach(function(player) { %>
+                                                <option value="<%= player.name %>"><%= player.name %></option>
+                                            <% }) %>
+                                        </select>
+                                        <select class="form-select form-select-sm w-75" name="matches[<%= i %>][team1][]">
+                                            <% selectedPlayers.forEach(function(player) { %>
+                                                <option value="<%= player.name %>"><%= player.name %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm w-75 mb-1" name="matches[<%= i %>][team2][]">
+                                            <% selectedPlayers.forEach(function(player) { %>
+                                                <option value="<%= player.name %>"><%= player.name %></option>
+                                            <% }) %>
+                                        </select>
+                                        <select class="form-select form-select-sm w-75" name="matches[<%= i %>][team2][]">
+                                            <% selectedPlayers.forEach(function(player) { %>
+                                                <option value="<%= player.name %>"><%= player.name %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-center mb-3">
+                    <button type="button" class="btn btn-success" onclick="addMatchRow()">매치추가</button>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <!-- <button type="submit" class="btn btn-primary" onclick="submitForm()">리그시작</button> -->
+                    <button type="submit" class="btn btn-primary">리그시작</button>
+                    <div class="ms-1 me-1"></div>
+            </form>
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">뒤로가기</button>
+                </div>
+        </div>
+        <div style="height: 100px;"></div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리그 간식 점수</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const members = <%- JSON.stringify(members.map(member => member.name)) %>;
+      const snackScores = <%- JSON.stringify(snackScores) %>; // 서버에서 전달된 snackScores
+
+      function addPlayer(name, score = '', remark = '') {
+        const tableBody = document.getElementById('player-body');
+        
+        // Check if participant already exists in the table
+        const existingRows = tableBody.querySelectorAll('tr');
+        if (![...existingRows].some(row => row.querySelector('.name-cell').textContent === name)) {
+          const row = document.createElement('tr');
+          
+          // Name cell
+          const nameCell = document.createElement('td');
+          nameCell.textContent = name;
+          nameCell.classList.add('name-cell');
+          nameCell.style.width = "75px"
+          row.appendChild(nameCell);
+          
+          // Score cell
+          const scoreCell = document.createElement('td');
+          const scoreInput = document.createElement('input');
+          scoreInput.classList.add('form-control');
+          scoreInput.classList.add('form-control-sm');
+          scoreInput.classList.add('w-75');
+          scoreInput.classList.add('score-input');
+          scoreInput.type = 'number';
+          scoreInput.name = 'scores[]';
+          scoreInput.placeholder = '점수입력';
+          scoreInput.min = 1;
+          scoreInput.required = true;
+          scoreInput.value = score; // set default value from snackScores
+          scoreInput.addEventListener('input', function(e) {
+            if (e.target.value < 1) {
+              e.target.value = 1;
+            }
+          });
+          scoreCell.appendChild(scoreInput);
+          row.appendChild(scoreCell);
+          
+          // Remark cell
+          const remarkCell = document.createElement('td');
+          const remarkInput = document.createElement('input');
+          remarkInput.type = 'text';
+          remarkInput.name = 'remarks[]';
+          remarkInput.placeholder = '비고입력';
+          remarkInput.classList.add('form-control');
+          remarkInput.classList.add('form-control-sm');
+          // remarkInput.classList.add('w-75');
+          remarkInput.classList.add('remarks-input');
+          remarkInput.value = remark; // set default value from snackScores
+          remarkCell.appendChild(remarkInput);
+          row.appendChild(remarkCell);
+
+          // Delete button cell
+          const deleteCell = document.createElement('td');
+          const deleteBtn = document.createElement('button');
+          deleteBtn.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+          deleteBtn.classList.add('btn');
+          deleteBtn.classList.add('btn-outline-danger');
+          deleteBtn.classList.add('border-0');
+          deleteBtn.classList.add('btn-sm');
+          // deleteBtn.classList.add('ms-2');
+
+          deleteBtn.onclick = function() {
+            tableBody.removeChild(row);
+          };
+          deleteCell.appendChild(deleteBtn);
+          row.appendChild(deleteCell);
+
+          tableBody.appendChild(row);
+        }
+      }
+
+      function autocomplete(inp, arr) {
+        var currentFocus;
+        inp.addEventListener("input", function(e) {
+          var a, b, i, val = this.value;
+          closeAllLists();
+          if (!val) { return false; }
+          currentFocus = -1;
+          a = document.createElement("DIV");
+          a.setAttribute("id", this.id + "autocomplete-list");
+          a.setAttribute("class", "autocomplete-items");
+          this.parentNode.appendChild(a);
+          for (i = 0; i < arr.length; i++) {
+            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+              b = document.createElement("DIV");
+              b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+              b.innerHTML += arr[i].substr(val.length);
+              b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+              b.addEventListener("click", function(e) {
+                inp.value = this.getElementsByTagName("input")[0].value;
+                closeAllLists();
+              });
+              a.appendChild(b);
+            }
+          }
+        });
+        inp.addEventListener("keydown", function(e) {
+          var x = document.getElementById(this.id + "autocomplete-list");
+          if (x) x = x.getElementsByTagName("div");
+          if (e.keyCode == 40) {
+            currentFocus++;
+            addActive(x);
+          } else if (e.keyCode == 38) {
+            currentFocus--;
+            addActive(x);
+          } else if (e.keyCode == 13) {
+            e.preventDefault();
+            if (currentFocus > -1) {
+              if (x) x[currentFocus].click();
+            }
+          }
+        });
+
+        function addActive(x) {
+          if (!x) return false;
+          removeActive(x);
+          if (currentFocus >= x.length) currentFocus = 0;
+          if (currentFocus < 0) currentFocus = (x.length - 1);
+          x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+          for (var i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
+          }
+        }
+
+        function closeAllLists(elmnt) {
+          var x = document.getElementsByClassName("autocomplete-items");
+          for (var i = 0; i < x.length; i++) {
+            if (elmnt != x[i] && elmnt != inp) {
+              x[i].parentNode.removeChild(x[i]);
+            }
+          }
+        }
+
+        document.addEventListener("click", function(e) {
+          closeAllLists(e.target);
+        });
+      }
+
+      // autocomplete(document.getElementById("player-search"), members);
+
+      document.getElementById('add-participant-btn').addEventListener('click', function() {
+        const participantInput = document.getElementById('player-search');
+        const participantName = participantInput.value.trim();
+
+        if (!members.includes(participantName)) {
+          alert('회원이 아닙니다.');
+          return;
+        }
+
+        addPlayer(participantName);
+        participantInput.value = '';
+      });
+
+      document.getElementById('player-search').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('add-participant-btn').click();
+        }
+      });
+
+      document.getElementById('snackForm').addEventListener('submit', function(event) {
+        const snackScores = [];
+        document.querySelectorAll('#player-body tr').forEach(row => {
+          const name = row.querySelector('.name-cell').textContent;
+          const scoreInput = row.querySelector('.score-input');
+          const remarkInput = row.querySelector('.remarks-input');
+          if (scoreInput && scoreInput.value) {
+            snackScores.push({
+              name: name,
+              score: parseInt(scoreInput.value, 10),
+              remark: remarkInput ? remarkInput.value : ''
+            });
+          }
+        });
+
+        document.getElementById('snackScores').value = JSON.stringify(snackScores);
+      });
+
+      // Add rows from server-provided snackScores
+      if (snackScores && snackScores.length > 0) {
+        snackScores.forEach(scoreData => {
+          addPlayer(scoreData.name, scoreData.score, scoreData.remark);
+        });
+      }
+    });
+  </script>
+  <style>
+    /* 스타일은 그대로 유지합니다 */
+    #total-count {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 20px;
+    }
+
+    .autocomplete-items {
+      position: absolute;
+      border: 1px solid #ddd;
+      background-color: white;
+      z-index: 9999;
+      width: 100%;
+    }
+
+    .autocomplete-items div {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .autocomplete-items div:hover {
+      background-color: #e9e9e9;
+    }
+  </style>
+</head>
+<body>
+    <%- include('../../partials/header.ejs') %>
+    <main>
+      <div class="container mt-3">
+        <h5 class="d-flex justify-content-center"><%= leagueName %> 간식점수</h5>
+        <form id="snackForm" action="/league/snack" method="POST">
+          <input type="hidden" id="leagueIndex" name="leagueIndex" value="<%= leagueIndex %>">
+          <input type="hidden" id="snackScores" name="snackScores">
+          <div>
+            <label id="member-count" class="mb-3">회원 검색</label>
+            <div class="input-group mb-3 player-search-container">
+              <input class="form-control" list="datalistOptions" id="player-search" placeholder="회원 검색">
+              <datalist id="datalistOptions">
+                <% members.forEach(member => { %>
+                  <option value="<%= member.name %>"><%= member.name %></option>
+                <% }) %>
+              </datalist>
+              <button class="btn btn-outline-secondary btn-warning text-white" type="button" id="add-participant-btn">추가</button>
+            </div>
+            <ul id="participant-list" class="list-group list-group-flush"></ul>
+          </div>
+          <div class="mb-5">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">이름</th>
+                  <th scope="col">점수</th>
+                  <th scope="col">비고</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody id="player-body"></tbody>
+            </table>
+          </div>
+          <div class="d-flex justify-content-center">
+            <button type="submit" class="btn btn-warning w-50">점수입력</button>
+            <div class="ms-1 me-1"></div>
+        </form>
+            <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">돌아가기</button>
+          </div>
+      </div>
+      <div style="height: 100px;"></div>
+    </main>
+    <%- include('../../partials/footer.ejs') %>
+  </body>
+</html>

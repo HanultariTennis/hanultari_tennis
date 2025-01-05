@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center"><%= league.name %> 기록</h5>
+      </div>
+      <div class="mb-3">
+        <a href="/history">
+          <button class="btn btn-secondary w-100">뒤로가기</button>
+        </a>  
+      </div>
+      <div class="mb-3">
+        <ul class="list-group list-group-flush text-start">
+          <li class="list-group-item">
+            <div class="mb-2">
+              <div class="mb-2">
+                <strong>진행자 후기</strong>
+                <span>(<%= league.manager %>)</span>
+              </div>
+              <% if (league.managerComment) { %>
+                <span><%= league.managerComment %></span>
+              <% } else { %>
+                <span>없음</span>
+              <% } %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <div class="mb-2">
+                <strong>간식 점수</strong>
+              </div>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>점수</th>
+                    <th>비고</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (snackScores && snackScores.length > 0) { %>
+                    <% snackScores.forEach(function(snackScore, index) { %>
+                      <% const oneRow = snackScore.split(':'); %>
+                      <tr>
+                        <th scope="row"><%= oneRow[0] %></th>
+                        <td><%= oneRow[1] %></td>
+                        <td><%= oneRow[2] %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <div class="mb-2">
+                <strong>4 승</strong>
+              </div>
+              <% if (league.fourWins) { %>
+                <span><%= league.fourWins.replace('/', ' ') %></span>
+              <% } else { %>
+                <span>없음</span>
+              <% } %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <div class="mb-2">
+                <strong>순위</strong>
+              </div>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>이름</th>
+                    <th>승</th>
+                    <th>패</th>
+                    <th>득</th>
+                    <th>실</th>
+                    <th>득실차</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% rankings.forEach((ranking, index) => { %>
+                    <tr>
+                      <th scope="row"><%= index + 1 %></th>
+                      <td><%= ranking.name %></td>
+                      <td class="text-primary fw-bold"><%= ranking.wins %></td>
+                      <td class="text-danger fw-bold"><%= ranking.losses %></td>
+                      <td><%= ranking.winGames %></td>
+                      <td><%= ranking.loseGames %></td>
+                      <td><%= ranking.gapWinLoss %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <div class="mb-2">
+                <strong>매치 결과</strong>
+              </div>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>팀 1</th>
+                    <th>점수</th>
+                    <th>팀 2</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% matches.forEach(match => { %>
+                    <tr>
+                      <th scope="row" style="width: 10%;"><%= match.number %></th>
+                      <td style="width: 35%;"><%= match.winAddPlayer %><br><%= match.winDeucePlayer %></td>
+                      <td style="width: 20%;"><%= match.winScore %> : <%= match.loseScore %></td>
+                      <td style="width: 35%;"><%= match.loseAddPlayer %><br><%= match.loseDeucePlayer %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>방식</strong>
+              &nbsp;
+              <span><%= league.format %></span>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>유형</strong>
+              &nbsp;
+              <span><%= league.type %></span>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>장소</strong>
+              &nbsp;
+              <span><%= league.place %></span>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>날짜</strong>
+              &nbsp;
+              <span><%= date %></span>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>참가자</strong>
+              &nbsp;
+              <span><%= league.people %> 명</span>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>시드</strong>
+              &nbsp;
+              <span><%= seedPlayers.length %> 명</span>
+              <% if (seedPlayers.length != 0) { %>
+                <br>
+                <br>
+                <% seedPlayers.forEach(function(seedPlayer, index) { %>
+                  <span><%= seedPlayer %></span>
+                <% }); %>
+              <% } %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <strong>비시드</strong>
+              &nbsp;
+              <span><%= noSeedPlayers.length %> 명</span>
+              <br>
+              <br>
+              <% noSeedPlayers.forEach(function(noSeedPlayer, index) { %>
+                <span><%= noSeedPlayer %></span>
+              <% }); %>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

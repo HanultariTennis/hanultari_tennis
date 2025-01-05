@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>랭킹</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  </style>
+  <script>
+    function filterByPlayer() {
+      const player = document.getElementById('searchPlayer').value;
+      const table = document.getElementById('rankingTable');
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+      for(let i = 0; i < rows.length; i++) {
+        const playerCell = rows[i].getElementsByTagName('td')[0];
+
+        if(playerCell && playerCell.innerText.includes(player)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">랭킹</h5>
+      </div>
+      <div class="mb-3">
+        <div class="row">
+          <div class="col">
+            <span style="font-size: small;">시즌</span>
+            <select class="form-select form-select-sm border border-warning" aria-label="Default select example" id="searchSeason">
+              <option value="2024" selected>2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </select>
+          </div>
+          <div class="col">
+            <span style="font-size: small;">선수</span>
+            <div class="mb-3">
+              <input type="text" class="form-control form-control-sm border border-warning" id="searchPlayer" list="datalistOptions" placeholder="이름 입력" onkeyup="filterByPlayer()">
+              <datalist id="datalistOptions">
+                <% members.forEach(member => { %>
+                  <option value="<%= member.name %>"><%= member.name %></option>
+                <% }) %>
+              </datalist>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <table class="table text-center" id="rankingTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>선수</th>
+              <th>승패</th>
+              <th>승률</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody id="rankingTable">
+            <% rankingTable.forEach(function(row, Index) { %>
+              <tr class="align-middle">
+                <th scope="row">
+                  <% if (Index == 0) { %>
+                    <img src="/icon/1st.svg" style="width: 60%; height: 60%;">
+                  <% } else if (Index == 1) { %>
+                    <img src="/icon/2nd.svg" style="width: 60%; height: 60%;">
+                  <% } else if (Index == 2) { %>
+                    <img src="/icon/3rd.svg" style="width: 60%; height: 60%;">
+                  <% } else { %>
+                    <!-- <%= row.ranking %> -->
+                    <%= Index + 1 %>
+                  <% } %>
+                </th>
+                <td>
+                  <a href="/ranking/member/<%= row.name %>" class="text-decoration-none text-warning">
+                    <img src="/path/to/<%= row.name %>.jpg" class="profile-pic border border-2 border-warning" alt="<%= row.name %>">
+                    <br>
+                    <strong><%= row.name %></strong>
+                  </a>
+                </td>
+                <td>
+                  <strong class="text-primary"><%= row.win %></strong> / <strong class="text-danger"><%= row.lose %></strong>
+                </td>
+                <td>
+                  <%= row.winRate %>%
+                </td>
+                <td>
+                  <%= row.point %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div style="height: 100px;"></div>
+    </div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

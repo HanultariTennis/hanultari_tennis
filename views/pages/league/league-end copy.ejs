@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .screenshot {
+      position: fixed;
+      bottom: 15%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    function deleteForm(event) {
+      var confirmation = confirm("정말로 리그를 삭제하시겠습니까?");
+      if (confirmation) {
+        document.getElementById("deleteCommand").value = "true";
+        document.getElementById("leagueEnd").submit(); // 사용자가 '네'를 선택한 경우 폼을 제출
+      } else {
+        event.preventDefault(); // 기본 폼 제출을 막음
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+            const screenshotButton = document.getElementById('screenshotButton');
+
+            if (screenshotButton) {
+                screenshotButton.addEventListener('click', () => {
+                    // html2canvas에서 제외할 요소를 필터링
+                    html2canvas(document.body, {
+                        ignoreElements: (element) => (element.id === 'excludeDiv1') || (element.id ==='excludeDiv2') || (element.id ==='excludeDiv3')
+                    }).then((canvas) => {
+                        // 캔버스를 이미지로 변환
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = 'screenshot.png';
+                        link.click();
+                    });
+                });
+            } else {
+                console.error('스크린샷 버튼이 존재하지 않습니다.');
+            }
+        });
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3 mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center"> <%= league.name %> 마감</h5>
+      </div>
+      <div class="mb-3" id="excludeDiv3">
+        <form id="leagueEnd" action="/league/end" method="POST">
+          <input type="hidden" name="leagueIndex" value="<%= leagueIndex %>">
+          <input type="hidden" name="deleteCommand" value="false" id="deleteCommand">
+          <div class="d-flex justify-content-center">
+            <div class="col">
+              <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">돌아가기</button>
+            </div>
+            <div class="ms-1 me-1"></div>
+            <div class="col">
+              <button type="submit" class="btn btn-warning w-100">리그마감</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="mb-3">
+        <div class="mb-2">
+          <strong>진행자 후기</strong>
+        </div>
+        <textarea type="text" class="form-control border" rows="3" id="board-contents" name="managerComment" placeholder="내용을 입력해주세요."></textarea>
+      </div>
+      <div class=""mb-3>
+        <ul class="list-group list-group-flush text-start">
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>방식</span>
+              &nbsp;
+              <strong><%= league.format %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>유형</span>
+              &nbsp;
+              <strong><%= league.type %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>장소</span>
+              &nbsp;
+              <strong><%= league.court %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>날짜</span>
+              &nbsp;
+              <strong><%= league.date.replace(/-/g, '.') %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>진행자</span>
+              &nbsp;
+              <strong><%= league.manager %></strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>참가자</span>
+              &nbsp;
+              <strong><%= league.people %> 명</strong>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>시드</span>
+              &nbsp;
+              <strong><%= league.seedPeople %> 명</strong>
+              <% if (league.seedPeople != 0) { %>
+                <br>
+                <br>
+                <% league.players.filter(player => player.seed.startsWith('시드')).forEach(function(player, index) { %>
+                  <strong><%= player.name %></strong>
+                <% }); %>
+              <% } %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>비시드</span>
+              &nbsp;
+              <strong><%= league.noSeedPeople %> 명</strong>
+              <br>
+              <br>
+              <% league.players.filter(player => player.seed.startsWith('선수')).forEach(function(player, index) { %>
+                <strong><%= player.name %></strong>
+              <% }); %>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>간식점수</span>
+              <br>
+              <br>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>점수</th>
+                    <th>비고</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (league.snackScores && league.snackScores.length > 0) { %>
+                    <% league.snackScores.forEach(function(snackScore, index) { %>
+                      <tr>
+                        <th scope="row"><%= snackScore.name %></th>
+                        <td><%= snackScore.score %></td>
+                        <td><%= snackScore.remark %></td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>순위</span>
+              <br>
+              <br>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th class="bg-white">#</th>
+                    <th class="bg-white">선수</th>
+                    <th class="bg-white">승</th>
+                    <th class="bg-white">패</th>
+                    <th class="bg-white">득</th>
+                    <th class="bg-white">실</th>
+                    <th class="bg-white">득실차</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% leagueRanking.forEach((ranking, index) => { %>
+                    <tr>
+                      <th scope="row"><%= index + 1 %></th>
+                      <td>
+                        <% const playerSeed = league.players.find(player => player.name == ranking.name).seed %>
+                        <% if (playerSeed.startsWith('시드')) { %>
+                          <p><%= ranking.name %>(S)</p>
+                        <% } else { %>
+                          <p><%= ranking.name %></p>
+                        <% } %>
+                      </td>
+                      <td class="text-primary fw-bold"><%= ranking.wins %></td>
+                      <td class="text-danger fw-bold"><%= ranking.losses %></td>
+                      <td><%= ranking.winGames %></td>
+                      <td><%= ranking.loseGames %></td>
+                      <td><%= ranking.gapWinLoss %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="list-group-item">
+            <div class="mb-2">
+              <span>매치</span>
+              <br>
+              <br>
+              <table class="table table-striped text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>팀1</th>
+                    <th>팀2</th>
+                    <th>점수</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% league.matches.forEach(function(match, index) { %>
+                    <tr>
+                      <th scope="row"><%= index + 1 %></th>
+                      <td>
+                        <%= match.team1[0] %>
+                        <br>
+                        <%= match.team1[1] %>
+                      </td>
+                      <td>
+                        <%= match.team2[0] %>
+                        <br>
+                        <%= match.team2[1] %>
+                      </td>
+                      <% if (match.score) { %>
+                        <td class="text-primary fw-bold"><%= match.score %></td>
+                      <% } else { %>
+                        <td class="text-danger fw-bold">미완</td>
+                      <% } %>
+                      <!-- <td><%= match.score || '미완' %></td> -->
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <div id="excludeDiv2" class="bg-warning text-white text-center align-content-center screenshot rounded-pill z-3" style="width: 50px; height: 50px;">
+    <img id="screenshotButton" src="/icon/camera.svg" style="width: 60%; height: 60%;" alt="스크린샷" style="cursor: pointer;">
+  </div>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

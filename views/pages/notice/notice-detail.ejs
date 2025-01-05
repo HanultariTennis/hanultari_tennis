@@ -1,0 +1,141 @@
+<!-- views/pages/notice-detail.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+  .profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .comment-pic {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-2">
+        <h5 class="text-warning" style="font-size: smaller;"><%= page %></h5>
+      </div>
+      <div class="mb-2">
+        <h1><%= board.summary %></h1>
+      </div>
+      <div class="row mb-3">
+        <div class="col-2">
+          <img src="/path/to/<%= board.author %>.jpg" class="profile-pic border border-2 border-warning" alt="<%= board.author %>">
+        </div>
+        <div class="col text-start">
+          <strong class="fs-6"><%= board.author %></strong>
+          <br>
+          <span class="text-secondary"><%= board.date %></span>
+        </div>
+      </div>
+      <div class="border-bottom mb-3"></div>
+      <div class="mb-4">
+        <% if (board.lastModified) { %>
+          <p><strong>마지막 수정일:</strong> <%= board.lastModified %></p>
+        <% } %>
+        <p><%= board.contents %></p>
+      </div>
+      <% if ((userRole == '관리자') || (userName == board.author)) { %>
+        <div class="mb-3">
+          <div class="d-flex justify-content-center ms-0 me-0 mb-3">
+            <div style="width: 100%;">
+              <a href="/notice/edit/<%= board.id %>" class="btn btn-warning w-100">수정</a>
+            </div>
+            <div class="ms-1 me-1"></div>
+            <div style="width: 100%;">
+              <form action="/notice/delete" method="POST" onclick="deleteForm(event)">
+                <input type="hidden" name="boardId" value="<%= board.id %>">
+                <button type="submit" class="btn btn-danger w-100">삭제</button>
+              </form>
+            </div>
+            <div class="ms-1 me-1"></div>
+            <div style="width: 100%;">
+              <a type="button" class="btn btn-secondary w-100" href="/notice">뒤로가기</a>
+            </div>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="mb-3">
+          <div class="d-flex justify-content-center ms-0 me-0 mb-3">
+            <div style="width: 100%;">
+              <a type="button" class="btn btn-secondary w-100" href="/notice">뒤로가기</a>
+            </div>
+          </div>
+        </div>
+      <% } %>
+      
+      <div class="border-bottom mb-3"></div>
+      <div class="mb-3">
+        <strong>댓글</strong>
+        <ul class="list-group list-group-flush">
+          <% comments.forEach((comment, index) => { %>
+            <li class="list-group-item pe-0">
+              <div class="row">
+                <div class="col-2">
+                  <img src="/path/to/<%= comment.author %>.jpg" class="comment-pic border border-2 border-warning" alt="<%= comment.author %>">
+                </div>
+                <div class="col">
+                  <strong><%= comment.author %></strong>
+                  <span><%= comment.date %></span>
+                  <br>
+                  <span><%= comment.contents %></span>
+                </div>
+              </div>
+            </li>
+          <% }) %> 
+        </ul>
+      </div>
+      <div class="border-bottom mb-3"></div>
+      <div class="mb-3">
+        <form action="/notice/comment" method="POST">
+          <input type="hidden" name="boardId" value="<%= board.id %>">
+          <input type="hidden" name="commentAuthor" value="<%= userName %>">
+          <input type="hidden" id="commentDate" name="commentDate">
+          <div class="row">
+            <div class="col-2 text-center mt-1">
+              <img src="/path/to/<%= userName %>.jpg" class="comment-pic border border-2 border-warning" alt="<%= userName %>">
+              <br>
+              <span style="font-size: smaller;"><%= userName %></span>
+            </div>
+            <div class="col">
+              <textarea class="w-100 h-100 border-white" name="commentContents" rows="1" placeholder="댓글을 남겨보세요." required></textarea>
+            </div>
+            <div class="col-3">
+              <button type="submit" class="btn btn-warning btn-sm w-100">등록</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer') %>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var today = new Date().toISOString().substr(0, 10);
+        document.getElementById("commentDate").value = today;
+    });
+
+    function deleteForm(event) {
+      var confirmation = confirm("정말로 삭제하시겠습니까?");
+      if (confirmation) {
+      } else {
+        event.preventDefault(); // 기본 폼 제출을 막음
+      }
+    }
+  </script>
+</body>
+</html>

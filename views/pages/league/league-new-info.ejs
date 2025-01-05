@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한울타리 - 리그기본정보</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    function generateLeagueName() {
+      const leagueType = document.getElementById('newType').value;
+      const date = document.getElementById('date').value;
+
+      if (leagueType && date) {
+        const formattedDate = date.replace(/-/g, '').slice(2);
+        let leagueName = '';
+        
+        if (leagueType == '리그') {
+          leagueName = `한울리그${formattedDate}`;
+        } else if (leagueType == '분기') {
+          leagueName = `한울분기${formattedDate}`;
+        }
+
+        document.getElementById('generatedLeagueName').textContent = leagueName;
+        document.getElementById('leagueName').value = leagueName;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('newDate').value = today;
+      generateLeagueName(); // 페이지 로드 시 기본 리그 이름도 생성
+    });
+  </script>
+
+<style>
+  .progress-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .step {
+    text-align: center;
+    flex: 1;
+  }
+
+  .circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    font-weight: bold;
+  }
+
+  .circle.check {
+    background-color: #ddd;
+  }
+
+  .label {
+    margin-top: 10px;
+    color: #999;
+  }
+
+  .active .circle {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .active .label {
+    color: black;
+  }
+</style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center">리그 생성</h5>
+
+      <div class=" d-flex mt-3 mb-3 justify-content-between">
+        <div class="stepper-item completed">
+          <div class="step-counter">1</div>
+          <div class="step-name">기본정보</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">2</div>
+          <div class="step-name">참가자</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">3</div>
+          <div class="step-name">시드</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">4</div>
+          <div class="step-name">확정</div>
+        </div>
+      </div>
+
+      <form action="/league/new/info" method="POST">
+        <div id="generatedLeagueName" style="margin-top: 10px; font-weight: bold;"></div>
+          <input type="hidden" id="newName" name="newName" value="">
+        </div>
+
+        <div class="ms-3 me-3 mb-3">
+          <label class="form-label" style="font-weight: bold;">방식</label>
+          <div class="btn-group w-100" role="group" aria-label="First Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="newFormat" id="btnradio1" autocomplete="off" value="한울AA" checked>
+            <label class="btn btn-outline-warning" for="btnradio1">한울AA</label>
+          
+            <input type="radio" class="btn-check" name="newFormat" id="btnradio2" autocomplete="off" value="한울AB">
+            <label class="btn btn-outline-warning" for="btnradio2">한울AB</label>
+          
+            <!-- <input type="radio" class="btn-check" name="newFormat" id="btnradio3" autocomplete="off" value="자유매치">
+            <label class="btn btn-outline-warning" for="btnradio3">자유매치</label> -->
+          </div>
+          <span style="font-size: smaller;">※ 자유매치 추후 업데이트</span>
+        </div>
+
+        <div class="ms-3 me-3 mb-3">
+          <label class="form-label" style="font-weight: bold;">유형</label>
+          <div class="btn-group w-100" role="group" aria-label="Second Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="newType" id="btnradio4" autocomplete="off" value="주말리그" checked>
+            <label class="btn btn-outline-warning" for="btnradio4">주말리그</label>
+          
+            <input type="radio" class="btn-check" name="newType" id="btnradio5" autocomplete="off" value="분기대회">
+            <label class="btn btn-outline-warning" for="btnradio5">분기대회</label>
+          
+            <input type="radio" class="btn-check" name="newType" id="btnradio6" autocomplete="off" value="친선경기">
+            <label class="btn btn-outline-warning" for="btnradio6">친선경기</label>
+          </div>
+        </div>
+
+        <div class="ms-3 me-3 mb-3">
+          <label class="form-label" style="font-weight: bold;">장소</label>
+          <select class="form-select border-warning text-warning" name="newCourt" id="newCourt" required onchange="generateLeagueName()">
+            <% courts.forEach(court => { %>
+              <option value="<%= court %>"><%= court %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="ms-3 me-3 mb-5">
+          <label class="form-label" style="font-weight: bold;">날짜</label>
+            <input class="form-select border-warning text-warning" type="date" id="newDate" name="newDate" required onchange="generateLeagueName()">
+        </div>
+
+        <div class="container ms-3 me-3">
+          
+
+          <!-- <div class="input-group mb-3 w-75">
+            <label class="input-group-text" for="newFormat">포맷</label>
+            <select class="form-select" name="newFormat" id="newFormat" required onchange="generateLeagueName()">
+              <option value="한울AA">한울AA</option>
+              <option value="한울AB">한울AB</option>
+              <option value="자유매치">자유매치</option>
+            </select>
+          </div> -->
+
+          <!-- <div class="input-group mb-3 w-75">
+            <label class="input-group-text" for="newType">유형</label>
+            <select class="form-select" name="newType" id="newType" required onchange="generateLeagueName()">
+              <option value="리그">리그</option>
+              <option value="분기">분기</option>
+              <option value="친선">친선</option>
+            </select>
+          </div> -->
+
+          <!-- <div class="input-group mb-3 w-75">
+            <label class="input-group-text" for="newCourt">장소</label>
+            <select class="form-select" name="newCourt" id="newCourt" required onchange="generateLeagueName()">
+              <% courts.forEach(court => { %>
+                <option value="<%= court %>"><%= court %></option>
+              <% }) %>
+            </select>
+          </div> -->
+
+          <!-- <div class="input-group mb-3 w-75">
+            <label class="input-group-text" for="newDate">날짜</label>
+            <input class="form-select" type="date" id="newDate" name="newDate" required onchange="generateLeagueName()">
+            </select>
+          </div> -->
+
+        </div>
+        <div class="d-flex justify-content-center ms-3 me-3">
+          <button type="submit" class="btn btn-warning w-50">다음단계</button>
+          <div class="ms-1 me-1"></div>
+      </form>
+        <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+        </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

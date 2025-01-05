@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTCm</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    // 배열에 이름을 저장하고 표에 추가하는 함수
+    const names = []; // 게스트 이름을 저장하는 배열
+
+    function addName() {
+      const nameInput = document.getElementById('nameInput');
+      const name = nameInput.value.trim();
+
+      if (name) {
+        names.push(name);
+        updateTable();
+        nameInput.value = '';
+      } else {
+        alert('게스트 이름을 입력하세요.');
+      }
+    }
+
+    function updateTable() {
+      const tableBody = document.getElementById('nameTable').querySelector('tbody');
+      tableBody.innerHTML = ''; // 기존 표 내용을 비웁니다.
+
+      // 이름을 3개씩 묶어서 표에 추가
+      for (let i = 0; i < names.length; i += 3) {
+        const row = document.createElement('tr');
+
+        for (let j = 0; j < 3; j++) {
+          const cell = document.createElement('td');
+          const index = i + j;
+
+          if (names[index]) {
+            cell.innerHTML = `
+              ${names[index]}
+              <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px;" onclick="deleteName(${index})">
+            `;
+          } else {
+            cell.innerHTML = ''; // 셀이 비어있을 경우 빈 셀 유지
+          }
+
+          row.appendChild(cell);
+        }
+
+        tableBody.appendChild(row);
+      }
+
+      updateNameCount(); // 표가 업데이트될 때마다 이름 개수를 업데이트
+    }
+
+    function deleteName(index) {
+      names.splice(index, 1); // 해당 인덱스의 이름을 배열에서 제거
+      updateTable(); // 표를 업데이트하여 변경 사항 반영
+    }
+
+    function updateNameCount() {
+      const countElement = document.getElementById('nameCount');
+      countElement.innerHTML = `${names.length} 명`; // 현재 배열의 길이를 카운트로 표시
+      countElement.value = names.length;
+
+      const checkboxes = document.querySelectorAll('.form-check-input');
+      const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+
+      document.getElementById('allCount').innerHTML = `${checkedCount + names.length} 명`;
+      document.getElementById('allCount').value = checkedCount + names.length;
+    }
+
+    function countChecked() {
+      // 모든 체크박스를 선택하고, 체크된 박스의 개수를 카운트
+      const checkboxes = document.querySelectorAll('.form-check-input');
+      const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+      
+      // 카운트된 값을 화면에 표시
+      document.getElementById('checkedCount').innerHTML = `${checkedCount} 명`;
+      document.getElementById('checkedCount').value = checkedCount;
+      document.getElementById('allCount').innerHTML = `${checkedCount + names.length} 명`;
+      document.getElementById('allCount').value = checkedCount + names.length;
+    }
+
+    // 이벤트 객체를 받아서 preventDefault()를 제대로 호출하도록 수정
+    function collectDataAndSubmit(e) {
+      e.preventDefault(); // 기본 폼 제출 방지
+
+      // allCount의 값을 가져와서 숫자로 변환
+      const playerCount = parseInt(document.getElementById('allCount').textContent);
+      const selectedFormat = "<%= selectedFormat %>"; // EJS 변수를 받아오는 부분
+
+      if (playerCount < 4) {
+        alert('리그 최소 인원은 4 명입니다.');
+      } else if (playerCount > 16) {
+        alert('리그 최대 인원은 16 명입니다.');
+      } else if ((selectedFormat == "한울AB") &&
+        ((playerCount != 8) &&
+        (playerCount != 10) &&
+        (playerCount != 12) &&
+        (playerCount != 14) &&
+        (playerCount != 16))) {
+        alert('한울 AB 방식에 적합한 인원은 8, 10, 12, 14, 16 명입니다.');
+      } else {
+        const returnData = document.getElementById('returnData');
+        names.forEach((guest, index) => {
+          const guestPlayersInput = document.createElement('input');
+          guestPlayersInput.type = 'hidden';
+          guestPlayersInput.name = 'guestPlayers[]';
+          guestPlayersInput.value = guest;
+          returnData.appendChild(guestPlayersInput);
+        });
+
+        const allMembers = document.querySelectorAll('.form-check-input');
+        const checkedMembers = Array.from(allMembers)
+          .filter(member => member.checked)
+          .map(member => member.nextElementSibling.textContent.trim());
+
+        checkedMembers.forEach((member, index) => {
+          const memberPlayersInput = document.createElement('input');
+          memberPlayersInput.type = 'hidden';
+          memberPlayersInput.name = 'memberPlayers[]';
+          memberPlayersInput.value = member;
+          returnData.appendChild(memberPlayersInput);
+        });
+
+        // 폼에 추가하여 전송
+        const form = document.getElementById('playerForm');
+        form.submit(); // 폼 제출
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // 페이지가 다시 로드될 때 캐시된 상태를 없애기 위해 새로고침
+      window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+          window.location.reload();
+        }
+      });
+
+      // 이벤트 리스너를 입력 필드에 추가
+      document.getElementById('nameInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();  // 기본 폼 제출 동작을 방지
+          addName();  // 이름 추가 함수 호출
+        }
+      });
+    });
+  </script>
+  <style>
+    td {
+      width: 33.33%; /* 각 열이 테이블 너비의 1/3을 차지 */
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <h5 class="d-flex justify-content-center">리그생성</h5>
+      <div class=" d-flex mt-3 mb-3 justify-content-between">
+        <div class="stepper-item completed">
+          <div class="step-counter">1</div>
+          <div class="step-name">기본정보</div>
+        </div>
+        <div class="stepper-item completed">
+          <div class="step-counter">2</div>
+          <div class="step-name">참가자</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">3</div>
+          <div class="step-name">시드</div>
+        </div>
+        <div class="stepper-item">
+          <div class="step-counter">4</div>
+          <div class="step-name">확정</div>
+        </div>
+      </div>
+      <form id="playerForm" action="/league/new/who" method="POST" onsubmit="collectDataAndSubmit(event);">
+        <div type="hidden" id="returnData"></div>
+        <div class="d-flex justify-content-center mb-3">
+          <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+          <div class="ms-1 me-1"></div>
+          <button type="submit" class="btn btn-warning w-50">다음단계</button>
+        </div>
+        <div class="mb-3 text-center">
+          <strong>총원</strong>
+          <span id="allCount" value="0">0 명</span>
+        </div>
+        <div class="mb-3">
+          <ul class="list-group">
+            <li class="list-group-item">
+              <div class="mb-2">
+                <strong>게스트</strong>
+                &nbsp;
+                <span id="nameCount">0 명</span>
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="이름 입력" aria-label="Recipient's username" aria-describedby="add-guest-btn" id="nameInput">
+                <button class="btn btn-outline-warning btn-warning text-black" type="button" id="add-guest-btn" onclick="addName()">추가</button>
+              </div>
+              <div>
+                <table class="table table-borderless" id="nameTable">
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="mb-2">
+                <strong>회원</strong>
+                &nbsp;
+                <span id="checkedCount">0 명</span>
+              </div>
+              <div>
+                <table class="table table-borderless">
+                  <tbody>
+                    <% members.forEach((member, index) => { %>
+                      <% if ((index % 3) == 0) { %>
+                        <tr>
+                          <td>
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="memberCheck<%= index %>" onclick="countChecked()">
+                              <label class="form-check-label" for="memberCheck<%= index %>">
+                                <%= member.name %>
+                              </label>
+                            </div>
+                          </td>
+                      <% } else if ((index % 3) == 2) { %>
+                          <td>
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="memberCheck<%= index %>" onclick="countChecked()">
+                              <label class="form-check-label" for="memberCheck<%= index %>">
+                                <%= member.name %>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                      <% } else { %>
+                          <td>
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="memberCheck<%= index %>" onclick="countChecked()">
+                              <label class="form-check-label" for="memberCheck<%= index %>">
+                                <%= member.name %>
+                              </label>
+                            </div>
+                          </td>
+                      <% } %>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">관리자</h5>
+      </div>
+      <div class="container">
+        <a href="/admin/member" class="btn btn-warning w-100 mb-3">회원관리</a>
+        <a href="/admin/ranking" class="btn btn-warning w-100 mb-3">랭킹관리</a>
+        <a href="/admin/court" class="btn btn-warning w-100 mb-3">코트관리</a>
+      </div>
+    </div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리그 생성 - 매치 리스트</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('../../partials/header') %>
+    <main>
+        <div class="container mt-3">
+            <h1 class="d-flex justify-content-center mb-3">리그 생성</h1>
+            <div class="container m-1">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item mb-1"><%= league.name %></li>
+                    <li class="list-group-item mb-1"></li>
+                </ul>
+                <div class="accordion mb-4" id="accordionExample">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button bg-warning text-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <strong>기본정보</strong>
+                        </button>
+                      </h2>
+                      <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item mb-1">
+                                    <span>방식</span>
+                                    &nbsp;
+                                    <strong><%= league.format %></strong>
+                                </li>
+                                <li class="list-group-item mb-1">
+                                    <span>유형</span>
+                                    &nbsp;
+                                    <strong><%= league.type %></strong>
+                                </li>
+                                <li class="list-group-item mb-1">
+                                    <span>장소</span>
+                                    &nbsp;
+                                    <strong><%= league.court %></strong>
+                                </li>
+                                <li class="list-group-item mb-1">
+                                    <span>날짜</span>
+                                    &nbsp;
+                                    <strong><%= league.date.replace(/-/g, '.') %></strong>
+                                </li>
+                            </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="accordion-item">
+                      <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-warning text-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            <strong>참가자</strong>
+                            &nbsp;
+                            <span><%= league.people %>명</span>
+                        </button>
+                      </h2>
+                      <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col text-center">
+                                  <strong>시드</strong> &nbsp; <strong class="fw-medium"><%= league.seedPeople %> 명</strong>
+                                  <ul class="list-group list-group-flush">
+                                    <% league.players.filter(player => player.seed.startsWith('시드')).forEach(function(player, index) { %>
+                                      <li class="list-group-item"><%= player.name %></li>
+                                    <% }); %>
+                                  </ul>
+                                </div>
+                                <div class="col text-center">
+                                  <strong>비시드</strong> &nbsp; <strong class="fw-medium"><%= league.noSeedPeople %> 명</strong>
+                                  <ul class="list-group list-group-flush">
+                                    <% league.players.filter(player => player.seed.startsWith('선수')).forEach(function(player, index) { %>
+                                      <li class="list-group-item"><%= player.name %></li>
+                                    <% }); %>
+                                  </ul>
+                                </div>
+                              </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">팀1</th>
+                            <th scope="col">팀2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% matchTable.forEach(function(match, index) { %>
+                            <tr style="height: 50px;">
+                                <th scope="row"><%= index + 1 %></th>
+                                <td><%= match.team1.join(' / ') %></td>
+                                <td><%= match.team2.join(' / ') %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <form action="/league/new/match" method="POST">
+                <div class="container d-flex justify-content-center">
+            
+                    <button type="submit" class="btn btn-warning w-50">리그시작</button>
+                    <div class="ms-1 me-1"></div>
+            </form>
+                    <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+                </div>
+        </div>
+        <div style="height: 100px;"></div>
+    </main>
+    <%- include('../../partials/footer') %>
+</body>
+</html>

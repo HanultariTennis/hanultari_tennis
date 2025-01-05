@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원 상세 정보</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+
+    .info {
+      margin-bottom: 10px;
+    }
+
+    .info label {
+      font-weight: bold;
+      display: inline-block;
+      width: 100px;
+    }
+
+    .info-container {
+      flex: 1;
+    }
+
+    .tabs {
+      display: flex;
+      margin-top: 20px;
+    }
+
+    .tab-header {
+      flex: 1;
+      padding: 10px;
+      cursor: pointer;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+
+    .tab-header.active {
+      background-color: #ccc;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ddd;
+      flex: 4;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .select-group {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .select-group select {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .stats-table th, .stats-table td {
+      padding: 10px;
+    }
+
+    .stats-table .category {
+      background-color: #f2f2f2;
+    }
+
+    .best-partner-table {
+      margin-bottom: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .best-partner-table th, .best-partner-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .best-partner-table th {
+      background-color: #f2f2f2;
+    }
+
+    .best-partner-name {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    function showTab(tabIndex) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const tabHeaders = document.querySelectorAll('.tab-header');
+
+      tabs.forEach((tab, index) => {
+        tab.classList.toggle('active', index === tabIndex);
+        tabHeaders[index].classList.toggle('active', index === tabIndex);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      showTab(0); // 기본적으로 첫 번째 탭을 표시
+    });
+
+    function updateStats() {
+      const selectedYear = document.getElementById('stats-select').value;
+      // 통계 데이터를 업데이트하는 로직 추가
+      console.log(`Selected year: ${selectedYear}`);
+      // 여기에 Ajax 요청이나 다른 데이터 업데이트 로직 추가 가능
+    }
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container bg-warning bg-opacity-75">
+      <div class="row">
+        <div class="bg-transparent" style="height: 325px; width: 60%;">
+          <h1 class="display-3 m-4 fw-bold"><%= member.name %></h1>
+          <div class="m-2 me-4">
+            <ul class="list-group list-group-flush text-start">
+              <li class="list-group-item bg-transparent border-danger">랭킹 1위</li>
+              <li class="list-group-item bg-transparent border-danger">생일 1991년 10월 15일</li>
+              <li class="list-group-item bg-transparent border-danger">가입일 2024년 2월14일</li>
+              <li class="list-group-item bg-transparent border-danger">2024년 승패 45/7</li>
+              <li class="list-group-item bg-transparent border-danger">베스트파트너 한예진</li>
+            </ul>
+          </div>
+        </div>
+        <div style="width: 40%;" class="p-0">
+          <img src="/path/to/박민규3.jpg" class="w-100 bg-transparent pt-4" alt="<%= member.name %>">
+        </div>
+      </div>
+      <!-- <div class="bg-transparent">
+        <div class="d-flex justify-content-center">
+          <div class="btn-group bg-white w-75" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
+            <label class="btn btn-outline-warning rounded-bottom-0" for="btnradio1" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">최근전적</label>
+          
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
+            <label class="btn btn-outline-warning" for="btnradio2" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">대회</label>
+          
+            <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
+            <label class="btn btn-outline-warning rounded-bottom-0" for="btnradio3" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">통계</label>
+          </div>
+        </div>
+        <div class="tab-content bg-white" id="myTabContent">
+          <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="btnradio1" tabindex="0">
+            최근 전적 내용
+          </div>
+          <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="btnradio2" tabindex="0">
+            대회 내용
+          </div>
+          <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="btnradio3" tabindex="0">
+            통계 내용
+          </div>
+        </div>
+      </div> -->
+    </div>
+    
+
+    <div>
+      <div class="btn-group" id="myTab" role="tablist">
+          <label class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Home</button>
+          <label class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Profile</button>
+          <label class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
+      </div>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">...</div>
+        <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">...</div>
+      </div>
+    </div>
+
+
+
+    <div class="container mt-3">
+      
+
+      <div class="container d-flex justify-content-center">
+        <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">뒤로가기</button>
+      </div>
+    </div>
+    
+    <h1>회원 상세 정보</h1>
+    <div class="container">
+      <div class="info-container">
+        <div class="info">
+          <label>이름:</label> <%= member.name %>
+        </div>
+        <div class="info">
+          <label>랭킹:</label> <%= member.랭킹 %>
+        </div>
+        <div class="info">
+          <label>생일:</label> <%= member.birth !== 'Invalid date' ? member.birth : '' %>
+        </div>
+        <div class="info">
+          <label>가입일:</label> <%= member.join !== 'Invalid date' ? member.join : '' %>
+        </div>
+        <div class="info">
+          <label>플레이 타입:</label> <%= member.playType %>
+        </div>
+      </div>
+      <img src="<%= photoUrl %>" class="profile-pic" alt="<%= member.name %>">
+    </div>
+
+    <div class="tabs">
+      <div class="tab-header active" onclick="showTab(0)">최근 매치</div>
+      <div class="tab-header" onclick="showTab(1)">대회 기록</div>
+      <div class="tab-header" onclick="showTab(2)">통계</div>
+    </div>
+
+    <div class="tabs-content">
+      <div class="tab-content active">
+        <div class="matches">
+          <table>
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>코트</th>
+                <th>팀 1</th>
+                <th>팀 2</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentMatches.forEach(match => { %>
+                <tr>
+                  <td><%= match.Date !== 'Invalid date' ? match.Date : '' %></td>
+                  <td><%= match.Court %></td>
+                  <td class="<%= match.winScore > match.loseScore ? 'bold' : '' %>">
+                    <%= match.winPlayer1 %><br><%= match.winPlayer2 %><br><%= match.winScore %>
+                  </td>
+                  <td class="<%= match.loseScore > match.winScore ? 'bold' : '' %>">
+                    <%= match.losePlayer1 %><br><%= match.losePlayer2 %><br><%= match.loseScore %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content">
+        <% const years = Object.keys(tournamentRecords).sort((a, b) => b - a); %>
+        <% years.forEach(year => { %>
+          <h4><%= year %></h4>
+          <table>
+            <thead>
+              <tr>
+                <th>대회명</th>
+                <th>결과</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% tournamentRecords[year].forEach(record => { %>
+                <tr>
+                  <td><%= record.tournament %></td>
+                  <td><%= record.result %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% }) %>
+      </div>
+
+      <div class="tab-content">
+        <div class="select-group">
+          <select id="stats-select" onchange="updateStats()">
+            <option value="Career">Career</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+          </select>
+        </div>
+        <table class="best-partner-table">
+          <thead>
+            <tr>
+              <th>베스트 파트너</th>
+              <th>승</th>
+              <th>패</th>
+              <th>승률</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="best-partner-name"><%= bestPartner.partner %></td>
+              <td class="bold"><%= bestPartner.wins %></td>
+              <td class="bold"><%= bestPartner.partnerLosses %></td>
+              <td class="bold"><%= (bestPartner.winRate * 100).toFixed(2) %>%</td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="stats-content">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>항목</th>
+                <th>승</th>
+                <th>패</th>
+                <th>승률</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="category bold">통산</td>
+                <td class="bold">15</td>
+                <td class="bold">2</td>
+                <td class="bold">88%</td>
+              </tr>
+              <tr>
+                <td>클레이</td>
+                <td>1</td>
+                <td>0</td>
+                <td>100%</td>
+              </tr>
+              <tr>
+                <td>하드</td>
+                <td>6</td>
+                <td>0</td>
+                <td>100%</td>
+              </tr>
+              <tr>
+                <td>인조잔디</td>
+                <td>8</td>
+                <td>2</td>
+                <td>80%</td>
+              </tr>
+              <tr>
+                <td class="category bold">실외</td>
+                <td class="bold">15</td>
+                <td class="bold">2</td>
+                <td class="bold">88%</td>
+              </tr>
+              <tr>
+                <td>실내</td>
+                <td>0</td>
+                <td>0</td>
+                <td>0%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

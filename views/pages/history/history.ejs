@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리그 리스트</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script>
+    function filterByPlayer() {
+      const player = document.getElementById('searchPlayer').value;
+      const table = document.getElementById('leagueTable');
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+      for(let i = 0; i < rows.length; i++) {
+        const nameCell = rows[i].getElementsByTagName('th')[0];
+        const placeCell = rows[i].getElementsByTagName('td')[0];
+        const playerCell = rows[i].getElementsByTagName('td')[1];
+        // const playres = playerCell.textContent || playerCell.innerText;
+
+        if(playerCell && playerCell.innerText.includes(player)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+
+    function filterByDate() {
+      const date = document.getElementById('searchDate').value;
+      const formattedDate = date.replace(/-/g, '').substring(2);
+      const table = document.getElementById('leagueTable');
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+
+      for(let i = 0; i < rows.length; i++) {
+        const nameCell = rows[i].getElementsByTagName('th')[0];
+
+        if(nameCell && nameCell.innerText.includes(formattedDate)) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <%- include('../../partials/header.ejs') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">기록</h5>
+      </div>
+      <div class="mb-3">
+        <div class="row">
+          <div class="col">
+            <span style="font-size: small;">시즌</span>
+            <select class="form-select form-select-sm border-warning" aria-label="Default select example" id="searchSeason">
+              <option value="2024" selected>2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+            </select>
+          </div>
+          <div class="col">
+            <span style="font-size: small;">선수</span>
+            <div class="mb-3">
+              <input type="text" class="form-control form-control-sm border-warning" id="searchPlayer" list="datalistOptions" placeholder="이름 입력" onkeyup="filterByPlayer()">
+              <datalist id="datalistOptions">
+                <% members.forEach(member => { %>
+                  <option value="<%= member.name %>"><%= member.name %></option>
+                <% }) %>
+              </datalist>
+            </div>
+          </div>
+          <div class="col">
+            <span style="font-size: small;">날짜</span>
+            <div class="mb-3">
+              <input type="date" class="form-control form-control-sm border-warning" id="searchDate" onchange="filterByDate()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <table class="table table-striped-columns" id="leagueTable">
+          <thead>
+            <tr class="text-center">
+              <th>이름</th>
+              <th>장소</th>
+              <th>참가자</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% leagues.forEach(league => { %>
+              <tr class="align-middle">
+                <th scope="row" class="text-center" style="width: 20%;">
+                  <a href="/history/<%= league.name %>" class="text-warning text-decoration-none">
+                    <%= league.name %>
+                  </a>
+                </td>
+                <td class="text-center" style="width: 25%; font-size: small;">
+                  <%= league.place %>
+                </td>
+                <td class="text-start" style="font-size: smaller;">
+                  <span>
+                    <%= league.seed %>/<%= league.noSeed %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer.ejs') %>
+</body>
+</html>

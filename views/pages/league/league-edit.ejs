@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리그 변경</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center mb-3"><%= league.name %> 리그수정</h5>
+      </div>
+      <div class="mb-3">
+        <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">돌아가기</button>
+      </div>
+      <form id="matchForm" action="/league/edit" method="POST">
+        <input type="hidden" id="leagueIndex" name="leagueIndex" value="<%= leagueIndex %>">
+        <input type="hidden" id="editMatches" name="editMatches" value="">
+        <div class="mb-3">
+          <div class="mb-3">
+            <label class="form-label">유형</label>
+            <div class="btn-group w-100" role="group" aria-label="Second Basic radio toggle button group">
+              <input type="radio" class="btn-check" name="editType" id="btnradio4" autocomplete="off" value="주말리그" <%= league.type === '주말리그' ? 'checked' : '' %>>
+              <label class="btn btn-outline-warning" for="btnradio4">주말리그</label>
+            
+              <input type="radio" class="btn-check" name="editType" id="btnradio5" autocomplete="off" value="분기대회" <%= league.type === '분기대회' ? 'checked' : '' %>>
+              <label class="btn btn-outline-warning" for="btnradio5">분기대회</label>
+            
+              <input type="radio" class="btn-check" name="editType" id="btnradio6" autocomplete="off" value="친선경기" <%= league.type === '친선경기' ? 'checked' : '' %>>
+              <label class="btn btn-outline-warning" for="btnradio6">친선경기</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">장소</label>
+            <select class="form-select border-warning text-warning" name="editCourt" id="editCourt" required>
+              <% courts.forEach(court => { %>
+                <option value="<%= court %>" <%= court === league.court ? 'selected' : '' %>><%= court %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">날짜</label>
+            <input class="form-select border-warning text-warning" type="date" id="editDate" name="editDate" value="<%= league.date %>" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="mb-3">
+            <h5 class="d-flex justify-content-center">매치변경</h5>
+          </div>
+          <div class="mb-3">
+            <span style="font-size: smaller;">드래그해서 매치 순서를 변경할 수 있습니다.</span>
+            <table class="table table-striped" style="vertical-align: middle; width: 90%;" id="sortable-table">
+              <thead class="text-center">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">팀1</th>
+                  <th scope="col" style="width: 10%;"></th>
+                  <th scope="col">팀2</th>
+                  <th scope="col" style="width: 5%;"></th>
+                </tr>
+              </thead>
+              <tbody id="matchTableBody" class="text-center">
+                  <% league.matches.forEach(function(match, index) { %>
+                      <tr data-existing="old" data-score="<%= match.score %>" name="matches[<%= index %>][score]" value="<%= match.score %>">
+                          <td>
+                            <strong><%= index + 1 %></strong>
+                          </td>
+                        <td>
+                          <div class="mb-2">
+                            <select class="form-select form-select-sm text-center" name="matches[<%= index %>][team1][]" style="width: 100%;">
+                              <% players.forEach(function(member) { %>
+                                <option value="<%= member %>" <%= member === match.team1[0] ? 'selected' : '' %>><%= member %></option>
+                              <% }) %>
+                            </select>
+                          </div>
+                          <div>
+                            <select class="form-select form-select-sm text-center" name="matches[<%= index %>][team1][]" style="width: 100%;">
+                              <% players.forEach(function(member) { %>
+                                <option value="<%= member %>" <%= member === match.team1[1] ? 'selected' : '' %>><%= member %></option>
+                              <% }) %>
+                            </select>
+                          </div>
+                        </td>
+                        <td>
+                          <%if (match.score != null) { %>
+                            <%= match.score %>
+                          <% } else { %>
+                              -
+                          <% } %>
+                        </td>
+                        <td>
+                          <div class="mb-2">
+                            <select class="form-select form-select-sm text-center" name="matches[<%= index %>][team2][]" style="width: 100%;">
+                              <% players.forEach(function(member) { %>
+                                <option value="<%= member %>" <%= member === match.team2[0] ? 'selected' : '' %>><%= member %></option>
+                              <% }) %>
+                            </select>
+                          </div>
+                          <div>
+                            <select class="form-select form-select-sm text-center" name="matches[<%= index %>][team2][]" style="width: 100%;">
+                              <% players.forEach(function(member) { %>
+                                <option value="<%= member %>" <%= member === match.team2[1] ? 'selected' : '' %>><%= member %></option>
+                              <% }) %>
+                            </select>
+                          </div>
+                        </td>
+                        <td>
+                          <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px; "onclick="deleteMatchRow(this)">
+                        </td>
+                          <%if (match.score != null) { %>
+                              <!-- <input type="hidden" id="matches[<%= index %>][score]" name="matches[<%= index %>][score]" value="<%= match.score %>"> -->
+                          <% } %>
+                      </tr>
+                    <% }) %>
+              </tbody>
+            </table>
+          </div>
+          <div class="d-flex justify-content-center mb-3">
+              <button type="button" class="btn btn-primary w-100" onclick="addMatchRow()">매치추가</button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-warning w-100" onclick="submitForm()">수정완료</button>
+        </div>
+      </form>
+    </div>
+    <div style="height: 100px;"></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+  <script>
+    function addMatchRow() {
+      var table = document.getElementById("matchTableBody");
+      var rowCount = table.rows.length;
+      var row = table.insertRow(rowCount);
+
+      row.setAttribute('data-existing', 'new');
+
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      var cell3 = row.insertCell(2);
+      var cell4 = row.insertCell(3);
+      var cell5 = row.insertCell(4);
+
+      cell1.innerHTML = `
+        <strong>
+          ${rowCount + 1}
+        </strong>
+      `;
+
+      cell2.innerHTML = `
+        <div class="mb-2">
+            <select class="form-select form-select-sm text-center" name="matches[${rowCount}][team1][]" style="width: 100%;">
+                <% players.forEach(function(member) { %>
+                    <option value="<%= member %>"><%= member %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div>
+            <select class="form-select form-select-sm text-center" name="matches[${rowCount}][team1][]" style="width: 100%;">
+                <% players.forEach(function(member) { %>
+                    <option value="<%= member %>"><%= member %></option>
+                <% }) %>
+            </select>
+        </div>`;
+      
+      cell3.innerHTML = `
+      -
+      `;
+      cell4.innerHTML = `
+        <div class="mb-2">
+            <select class="form-select form-select-sm text-center" name="matches[${rowCount}][team2][]" style="width: 100%;">
+                <% players.forEach(function(member) { %>
+                    <option value="<%= member %>"><%= member %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div>
+            <select class="form-select form-select-sm text-center" name="matches[${rowCount}][team2][]" style="width: 100%;">
+                <% players.forEach(function(member) { %>
+                    <option value="<%= member %>"><%= member %></option>
+                <% }) %>
+            </select>
+        </div>`;
+
+        cell5.innerHTML = `
+          <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px; "onclick="deleteMatchRow(this)">
+        `;
+      }
+
+      function deleteMatchRow(button) {
+        var row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+
+        // 매치 번호를 업데이트
+        var table = document.getElementById("matchTableBody");
+
+        for (var i = 0; i < table.rows.length; i++) {
+          var currentRow = table.rows[i];
+          let score = currentRow.getAttribute('data-score') || '0:0'; 
+
+          // 기존 행과 새로 추가된 행 구분
+          var isExisting = currentRow.getAttribute('data-existing') === 'old';
+
+          if (isExisting) {
+            currentRow.cells[0].innerHTML = `
+              <strong>${i + 1}</strong>
+            `;
+          } else {
+            currentRow.cells[0].innerHTML = `
+              <strong> ${i + 1}</strong>
+            `;
+          }
+          
+          // name 속성 업데이트
+          table.rows[i].cells[1].querySelectorAll("select[name^='matches']").forEach(function(select, index) {
+              select.name = `matches[${i}][team1][${index}]`;
+          });
+          if (isExisting) {
+            table.rows[i].cells[2].innerHTML = `
+              ${score}
+            `;
+          } else {
+            table.rows[i].cells[2].innerHTML = `
+              new
+            `;
+          }
+          
+          table.rows[i].cells[3].querySelectorAll("select[name^='matches']").forEach(function(select, index) {
+              select.name = `matches[${i}][team2][${index}]`;
+          });
+
+          table.rows[i].cells[4].innerHTML = `
+            <img type="button" class="text-center m-auto text-danger" src="/icon/delete.svg" style="width: 20px; height: 20px; "onclick="deleteMatchRow(this)">
+          `;
+        }
+      }
+
+      function submitForm() {
+        var table = document.getElementById("matchTableBody");
+        var matches = [];
+
+        for(var i = 0; i < table.rows.length; i++) {
+          var currentRow = table.rows[i];
+
+          var team1Selects = currentRow.cells[1].querySelectorAll("select");
+          var team2Selects = currentRow.cells[3].querySelectorAll("select");
+
+          var team1 = Array.from(team1Selects).map(select => select.value);
+          var team2 = Array.from(team2Selects).map(select => select.value);
+
+          let score = currentRow.getAttribute('data-score'); 
+
+          if(score) {
+            matches.push({
+            team1: team1,
+            team2: team2,
+            score: score
+          });
+          } else {
+            matches.push({
+            team1: team1,
+            team2: team2,
+          });
+          }
+        }
+
+        var matchesJson = JSON.stringify(matches);
+        document.getElementById("editMatches").value = matchesJson;
+        document.getElementById("matchForm").submit();
+      }
+
+    function updateRowNumbers() {
+        const rows = document.querySelectorAll('#sortable-table tbody tr');
+
+        rows.forEach((row, index) => {
+          row.querySelector('td').innerHTML = `
+          <strong>${index + 1}</strong>
+          `;
+        });
+    }
+
+    // Initialize sortable with the update callback
+    new Sortable(document.querySelector('#sortable-table tbody'), {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function(evt) {
+            updateRowNumbers(); // Update row numbers and colors after drag and drop
+        }
+    });
+
+    // Initial update of row numbers and colors
+    // updateRowNumbers();
+  </script>
+</body>
+</html>
