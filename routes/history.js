@@ -3,6 +3,15 @@ const path = require('path');
 const xlsx = require('xlsx');
 const router = express.Router();
 
+const {
+  readGoogleSheet,
+  rankingSheets,
+  tourSheets,
+  leagueSheets,
+  matchSheets,
+  memberSheets,
+} = require('./googleSheet');
+
 // 엑셀 파일 경로
 const memberFilePath = path.join(__dirname, '../database', 'member.xlsx');
 const leagueFilePath = path.join(__dirname, '../database', 'league.xlsx');
@@ -93,7 +102,6 @@ function getRankings(players, matches) {
 };
 
 router.get('/', async (req, res) => {
-  db.collection('post').find().toArray();
   if(req.isAuthenticated()) {
     const members = readExcelFile(memberFilePath).sort((a, b) => a.name.localeCompare(b.name));
     let leagues = readExcelFile(leagueFilePath).map(league => {

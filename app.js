@@ -5,12 +5,21 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
-const xlsx = require('xlsx');
 const rankingRoutes = require('./routes/ranking');
 const leagueRoutes = require('./routes/league');
 const historyRoutes = require('./routes/history');
 const adminRoutes = require('./routes/admin');
 const noticeRoutes = require('./routes/notice');
+
+const {
+  readGoogleSheet,
+  writeGoogleSheet,
+  rankingSheets,
+  tourSheets,
+  leagueSheets,
+  matchSheets,
+  memberSheets,
+} = require('./routes/googleSheet');
 
 const app = express();
 
@@ -18,32 +27,10 @@ const session = require('express-session')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 
-const { MongoClient } = require('mongodb')
-
-let db
-const url = 'mongodb+srv://admin:gksdnfxkfl2007@hanultari-tennis.0rzdd.mongodb.net/?retryWrites=true&w=majority&appName=Hanultari-Tennis'
-new MongoClient(url).connect().then((client)=>{
-  console.log('DB연결성공')
-  db = client.db('hanultari')
-}).catch((err)=>{
-  console.log(err)
-})
-
-// 엑셀 파일 읽는 함수
-const readExcelFile = (filePath) => {
-  const workbook = xlsx.readFile(filePath);
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
-  const data = xlsx.utils.sheet_to_json(worksheet);
-  return data;
-};
-
 const options = {
   key: fs.readFileSync('public/path/to/private.key'),
   cert: fs.readFileSync('public/path/to/certificate.crt')
 };
-
-const memberFilePath = path.join(__dirname, 'database', 'member.xlsx');
 
 app.use(passport.initialize())
 app.use(session({
@@ -66,14 +53,7 @@ app.use(methodOverride('_method'));
 
 // Passport Local Strategy 설정
 passport.use(new LocalStrategy(async (username, password, done) => {
-  const members = readExcelFile(memberFilePath).map(row => {
-    return {
-      name: row.name,
-      password: row.password,
-      role: row.role
-    };
-  });
-  
+  const members = await readGoogleSheet(memberSheets, 'member');
   const member = members.find(member => member.name == username);
 
   if (!member) {
@@ -116,7 +96,7 @@ app.get('/', (req, res) => {
   
 });
 
-app.get('/login', (req, res) => {
+app.get('/login', async (req, res) => {
   if(req.isAuthenticated()) {
     res.redirect('/league');
   } else {
@@ -235,3 +215,95 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// Google 인증 설정
+// const auth = new google.auth.GoogleAuth({
+//   keyFile: 'singular-chain-446508-s3-1e059c3b3f2a.json', // JSON 키 파일 경로
+//   scopes: ['https://www.googleapis.com/auth/spreadsheets'], // 권한
+// });
+
+// async function accessGoogleSheets() {
+//   const client = await auth.getClient();
+
+//   const spreadsheetId = '1QTJ867_m8YqmWVOdLhBFdwjJLcNC-BwIjTBadknehLU'; // Google Sheets URL에서 ID 복사
+//   const range = 'member'; // 읽고/쓰고 싶은 범위
+
+//   // 데이터 읽기
+//   const readData = await sheets.spreadsheets.values.get({
+//       auth: client,
+//       spreadsheetId,
+//       range,
+//   });
+//   console.log('읽은 데이터:', readData.data.values);
+// }
+
+// accessGoogleSheets().catch(console.error);
+
+
+// const { MongoClient } = require('mongodb')
+
+// let db
+// const url = 'mongodb+srv://admin:gksdnfxkfl2007@hanultari-tennis.0rzdd.mongodb.net/?retryWrites=true&w=majority&appName=Hanultari-Tennis'
+// new MongoClient(url).connect().then((client)=>{
+//   console.log('DB연결성공')
+//   db = client.db('hanultari')
+// }).catch((err)=>{
+//   console.log(err)
+// })
+
+
+
+/****************************************************************************************************
+ * google api
+ ****************************************************************************************************/
+// const { google } = require('googleapis');
+// const sheets = google.sheets('v4');
+
+// let client;
+// const rankingSheets = '1QlTiXskeYQRZY5i0UQg-C4T88tLpa-fiWmHDvBTRdbc';
+// const tourSheets = '10WfSwZqwh_3B3y4fXzHbpZFy7lHMfORX4rC60oeps6U';
+// const leagueSheets = '1DbCinnMlibKxaM_u8EcPZEr0nSfOf1tYA_V-kY2Bkgw';
+// const matchSheets = '1eHhxYgmMseySauIuIaX746gIx9JmbDhx14qA7QvIGnw';
+// const memberSheets = '1QTJ867_m8YqmWVOdLhBFdwjJLcNC-BwIjTBadknehLU';
+// const auth = new google.auth.GoogleAuth({
+//   keyFile: 'singular-chain-446508-s3-1e059c3b3f2a.json', // JSON 키 파일 경로
+//   scopes: ['https://www.googleapis.com/auth/spreadsheets'], // 권한
+// });
+
+
+// // Google Sheets 클라이언트 초기화
+// async function initializeGoogleSheets() {
+//   client = await auth.getClient();
+//   console.log('Google Sheets 클라이언트 초기화 완료');
+// }
+
+// // 데이터 읽기 함수
+// async function readGoogleSheet(spreadsheetId, range) {
+//   if (!client) {
+//     console.error('Google Sheets 클라이언트가 초기화되지 않았습니다.');
+//     return;
+//   }
+//   if (!spreadsheetId || !range) {
+//     console.error('spreadsheetId 또는 range가 설정되지 않았습니다.');
+//     return;
+//   }
+//   const response = await sheets.spreadsheets.values.get({
+//     auth: client,
+//     spreadsheetId,
+//     range,
+//   });
+//   console.log(response.data.values);
+//   return response.data.values;
+// }
+
+// module.exports = {
+//   readGoogleSheet,
+//   rankingSheets,
+//   tourSheets,
+//   leagueSheets,
+//   matchSheets,
+//   memberSheets,
+// };
+
+/****************************************************************************************************
+ * run
+ ****************************************************************************************************/

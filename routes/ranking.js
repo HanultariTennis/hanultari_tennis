@@ -112,7 +112,7 @@ function updateRankings() {
   });
   rankingTable.sort((a, b) => b.point - a.point);
 
-  console.log(rankingTable)
+  // console.log(rankingTable)
 
   // rankingTable.sort((a, b) => {
   //   if (a.ranking !== b.ranking) {
