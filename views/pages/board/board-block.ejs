@@ -1,0 +1,103 @@
+<!-- views/pages/notice.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>한울타리 테니스</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .pencil {
+      position: fixed;
+      bottom: 15%;
+      right: 5%;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+  </style>
+</head>
+<body>
+  <%- include('../../partials/header') %>
+  <main>
+    <div class="container z-1 mt-3">
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center">게시판 개발 중</h5>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span style="font-size: small;">제목</span>
+          <div class="mb-3">
+            <input type="text" class="form-control form-control-sm border-warning" id="searchSummary" placeholder="제목 입력" onkeyup="filterBoard()">
+          </div>
+        </div>
+        <div class="col">
+          <span style="font-size: small;">선수</span>
+          <div class="mb-3">
+            <input type="text" class="form-control form-control-sm border-warning" id="searchPerson" list="datalistOptions" placeholder="이름 입력" onkeyup="filterBoard()">
+            <datalist id="datalistOptions">
+              <% members.forEach(member => { %>
+                <option value="<%= member.name %>"><%= member.name %></option>
+              <% }) %>
+            </datalist>
+          </div>
+        </div>
+        <div class="col">
+          <span style="font-size: small;">날짜</span>
+          <div class="mb-3">
+            <input type="date" class="form-control form-control-sm border-warning" id="searchDate" onchange="filterBoard()">
+          </div>
+        </div>
+      </div>
+      
+    <div style="height: 100px;"></div>
+  </main>
+  <%- include('../../partials/footer') %>
+  <script>
+    function filterBoard() {
+      const searchSummary = document.getElementById('searchSummary').value;
+      const searchPerson = document.getElementById('searchPerson').value;
+      const searchDate = document.getElementById('searchDate').value;
+      let formattedDate;
+      if (!searchDate) {
+        formattedDate = '';
+      } else {
+        const year = searchDate.slice(2, 4);
+        const month = searchDate.slice(5, 7);
+        const day = searchDate.slice(8, 10);
+        formattedDate = year + '.' + month+ '.' + day;
+      }
+
+      const noticeList = document.getElementById('noticeList');
+      const notices = noticeList.getElementsByTagName('ul')[0].getElementsByTagName('li');
+      
+      for (var i = 0; i < notices.length; i++) {
+        const summary = notices[i].getElementsByTagName('span')[0];
+        const person = notices[i].getElementsByTagName('span')[1];
+
+        if ((summary && summary.innerText.includes(searchSummary)) &&
+        (person && person.innerText.includes(searchPerson)) &&
+        (person && person.innerText.includes(formattedDate))) {
+          notices[i].style.display = '';
+        } else {
+          notices[i].style.display = 'none';
+        }
+      }
+
+      const postList = document.getElementById('postList');
+      const posts = postList.getElementsByTagName('ul')[0].getElementsByTagName('li');
+
+      for (var i = 0; i < posts.length; i++) {
+        const summary = posts[i].getElementsByTagName('span')[0];
+        const person = posts[i].getElementsByTagName('span')[1];
+
+        if ((summary && summary.innerText.includes(searchSummary)) &&
+        (person && person.innerText.includes(searchPerson)) &&
+        (person && person.innerText.includes(formattedDate))) {
+          posts[i].style.display = '';
+        } else {
+          posts[i].style.display = 'none';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

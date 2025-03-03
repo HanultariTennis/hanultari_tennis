@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>한울타리 - 리그</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>한울타리 테니스</title>
   <link rel="apple-touch-icon" href="../../path/to/180.png">
   <style>
     .hidden {
@@ -11,14 +11,14 @@
     }
     .add {
       position: fixed;
-      bottom: 15%;
-      right: 5%;
+      bottom: 100px;
+      right: 20px;
       z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
     }
     .money {
       position: fixed;
-      bottom: 25%;
-      right: 5%;
+      bottom: 160px;
+      right: 20px;
       z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
     }
   </style>
@@ -89,84 +89,6 @@
           <% }) %>
         </ul>
       </div>
-      
-        
-      
-
-
-
-
-      <!-- <% leagues.forEach(function(league, leagueIndex) { %>
-        <div class="border border-warning border-2 rounded-3 m-1 bg-warning bg-opacity-25 mt-3">
-          <div class="d-flex m-2">
-            <h6 class="flex-fill fw-bold"><%= league.name %> <%= league.format %> <%= league.court %></h6>
-            <button class="btn btn-warning btn-sm flex-fill" onclick="toggleLeagueDetails(<%= leagueIndex %>)">펼치기</button>
-          </div>
-          <div id="league-details-<%= leagueIndex %>" class="hidden">
-            <div class="btn-group m-2 d-flex justify-content-center" role="group" aria-label="Basic outlined example">
-              <a href="/league/ranking?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75 fs-6">순위결과</a>
-              <a href="/league/snack?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">간식점수</a>
-              <a href="/league/edit?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">리그변경</a>
-              <a href="/league/end?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-white bg-warning bg-opacity-75">리그종료</a>
-            </div>
-            <% league.matches.forEach(function(match, matchIndex) { %>
-              <div class="contianer bg-warning bg-opacity-50 rounded-3 border-2 m-2">
-                <div class=" m-1">
-                  <div>매치 <%= matchIndex + 1 %>번 – <%= league.court %></div>
-                </div>
-                <div class="row">
-                  <div class="col ms-2">
-                    <div class="container border border-warning rounded-3 bg-warning bg-opacity-50 text-center fs-5 fw-bold text-white d-flex align-items-center justify-content-center <%= match.score && parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'winner highlight' : '' %>" style="height: 90%;">
-                      <div>
-                        <% const team1Player1 = league.players.find(function(p) { return p.name === match.team1[0]; }); %>
-                        <% const team1Player2 = league.players.find(function(p) { return p.name === match.team1[1]; }); %>
-                        <% if (team1Player1.seed == true) { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team1Player1.name %>(s)</div>
-                        <% } else { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team1Player1.name %></div>
-                        <% } %>
-                        <% if (team1Player2.seed == true) { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team1Player2.name %>(s)</div>
-                        <% } else { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team1Player2.name %></div>
-                        <% } %>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-2 w-25 text-center">
-                    <% if (match.score) { %>
-                      <span style="<%= parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'color: blue; font-size: 1.5em;' : '' %>"><%= match.score.split(':')[0] %></span> :
-                      <span style="<%= parseInt(match.score.split(':')[1]) > parseInt(match.score.split(':')[0]) ? 'color: blue; font-size: 1.5em;' : '' %>"><%= match.score.split(':')[1] %></span>
-                    <% } else { %>
-                      진행 중
-                    <% } %>
-                    <a href="league/score?leagueIndex=<%= leagueIndex %>&matchIndex=<%= matchIndex %>" class="btn btn-warning btn-sm m-1 mb-2">입력</a>
-                  </div>
-                  <div class="col me-2">
-                    <div class="container border border-success rounded-3 bg-warning bg-opacity-50 text-center fs-5 fw-bold text-white d-flex align-items-center justify-content-center <%= match.score && parseInt(match.score.split(':')[0]) > parseInt(match.score.split(':')[1]) ? 'winner highlight' : '' %>" style="height: 90%;">
-                      <div>
-                        <% const team2Player1 = league.players.find(function(p) { return p.name === match.team2[0]; }); %>
-                        <% const team2Player2 = league.players.find(function(p) { return p.name === match.team2[1]; }); %>
-                        <% if (team2Player1.seed == true) { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team2Player1.name %>(s)</div>
-                        <% } else { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team2Player1.name %></div>
-                        <% } %>
-                        <% if (team2Player2.seed == true) { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team2Player2.name %>(s)</div>
-                        <% } else { %>
-                          <div class="h-auto fs-6 fw-bold"><%= team2Player2.name %></div>
-                        <% } %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-              </div>
-            <% }) %>
-          </div>
-        </div>
-      <% }) %> -->
     </div>
     <div style="height: 100px;"></div>
   </main>
@@ -191,14 +113,17 @@
       buttons.forEach(button => button.textContent = '펼치기');
     });
   </script>
-  <div class="bg-success text-white text-center align-content-center money rounded-pill z-3" style="width: 50px; height: 50px;">
-    <a href="/league/meal">
-      <img src="/icon/money.svg" style="width: 60%; height: 60%;">
+  <div class="bg-success text-white text-center align-content-center money rounded-5 z-3" style="width: 120px; height: 50px; display: flex; align-items: center; justify-content: center;">
+    <!-- <a href="/league/meal" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 5px;"> -->
+    <a href="/league/meal" style="color: white; text-decoration: none;">
+      <img src="/icon/money.svg" style="width: 30px; height: 30px;">
+      <span>밥값계산</span>
     </a>
   </div>
-  <div class="bg-warning text-white text-center align-content-center add rounded-pill z-3" style="width: 50px; height: 50px;">
-    <a href="/league/new/info">
-      <img src="/icon/add.svg" style="width: 60%; height: 60%;">
+  <div class="bg-primary text-white text-center align-content-center add rounded-5 z-3" style="width: 120px; height: 50px;  display: flex; align-items: center; justify-content: center;"">
+    <a href="/league/new/info" style="color: white; text-decoration: none;">
+      <img src="/icon/add.svg" style="width: 30px; height: 30px">
+      <span>신규리그</span>
     </a>
   </div>
   <%- include('../../partials/footer.ejs') %>

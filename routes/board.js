@@ -61,7 +61,7 @@ router.get('/', (req, res) => {
       };
     });
     
-    res.render('pages/notice/notice', {
+    res.render('pages/board/board-block', {
         notices: notices.reverse(),
         posts: posts.reverse(),
         members,
@@ -76,7 +76,7 @@ router.get('/', (req, res) => {
 // 공지 작성 페이지 렌더링
 router.get('/new', (req, res) => {
   if(req.isAuthenticated()) {
-    res.render('pages/notice/notice-new', {
+    res.render('pages/board/board-new', {
       userName : req.user.name,
       userRole: req.user.role
     });
@@ -95,7 +95,7 @@ router.get('/detail/:id', (req, res) => {
     const targetNotice = notices.find(notice => notice.id == targetId);
     const targetComment = comments.filter(comment => comment.noticeId == targetId);
 
-    res.render('pages/notice/notice-detail', {
+    res.render('pages/board/board-detail', {
       page: '공지사항',
       board: targetNotice,
       comments: targetComment,
@@ -108,7 +108,7 @@ router.get('/detail/:id', (req, res) => {
     const targetPost = posts.find(post => post.id == targetId);
     const targetComment = comments.filter(comment => comment.noticeId == targetId);
 
-    res.render('pages/notice/notice-detail', {
+    res.render('pages/board/board-detail', {
       page: '자유게시판',
       board: targetPost,
       comments: targetComment,
@@ -182,7 +182,7 @@ router.post('/new', async (req, res) => {
 
     }
 
-    res.redirect('/notice');
+    res.redirect('/board');
 });
 
 // 공지 수정 페이지 렌더링
@@ -193,7 +193,7 @@ router.get('/edit/:id', (req, res) => {
     const notices = readExcelFile(noticeExcelPath);
     const targetNotice = notices.find(notice => notice.id == targetId);
 
-    res.render('pages/notice/notice-edit', {
+    res.render('pages/board/board-edit', {
       page: '공지사항',
       board : targetNotice,
       userName: req.user.name,
@@ -203,7 +203,7 @@ router.get('/edit/:id', (req, res) => {
     const posts = readExcelFile(postExcelPath);
     const targetPost = posts.find(post => post.id == targetId);
 
-    res.render('pages/notice/notice-edit', {
+    res.render('pages/board/board-edit', {
       page: '자유게시판',
       board: targetPost,
       userName: req.user.name,
@@ -292,7 +292,7 @@ router.post('/comment', async (req, res) => {
   await commentWorkbook.xlsx.writeFile(commentExcelPath);
   console.log('comment.xlsx 업데이트 성공!');
 
-  res.redirect(`/notice/detail/${boardId}`);
+  res.redirect(`/board/detail/${boardId}`);
 
   // const createdAt = format(new Date(), 'yyyy-MM-dd');
 
@@ -354,7 +354,7 @@ router.post('/delete', async (req, res) => {
 
   await Workbook.xlsx.writeFile(ExcelPath);
   console.log('xlsx 업데이트 성공!');
-  res.redirect('/notice');
+  res.redirect('/board');
 
 });
 

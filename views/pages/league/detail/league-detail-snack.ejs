@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>리그 간식 점수</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>한울타리 테니스</title>
   <link rel="stylesheet" href="/styles.css">
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      const members = <%- JSON.stringify(members.map(member => member.name)) %>;
+      const members = <%- JSON.stringify(memberRawData.map(member => member.name)) %>;
       const snackScores = <%- JSON.stringify(snackScores) %>; // 서버에서 전달된 snackScores
 
       function addPlayer(name, score = '', remark = '') {
@@ -152,11 +152,23 @@
 
       // autocomplete(document.getElementById("player-search"), members);
 
+      // document.getElementById('add-participant-btn').addEventListener('click', function() {
+      //   const participantInput = document.getElementById('player-search');
+      //   const participantName = participantInput.value.trim();
+
+      //   if (!memberRawData.includes(participantName)) {
+      //     alert('회원이 아닙니다.');
+      //     return;
+      //   }
+
+      //   addPlayer(participantName);
+      //   participantInput.value = '';
+      // });
       document.getElementById('add-participant-btn').addEventListener('click', function() {
         const participantInput = document.getElementById('player-search');
         const participantName = participantInput.value.trim();
 
-        if (!members.includes(participantName)) {
+        if (!members.includes(participantName)) { 
           alert('회원이 아닙니다.');
           return;
         }
@@ -164,6 +176,7 @@
         addPlayer(participantName);
         participantInput.value = '';
       });
+
 
       document.getElementById('player-search').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
@@ -226,7 +239,19 @@
   </style>
 </head>
 <body>
-    <%- include('../../partials/header.ejs') %>
+    <!-- 헤더 -->
+    <header class="position-fixed top-0 start-0 w-100 bg-white shadow-sm py-2">
+      <!-- 뒤로가기 버튼 (왼쪽 정렬) -->
+      <a href="javascript:history.back()" class="position-absolute start-0 ps-3 btn btn-link text-dark text-decoration-none">
+        <strong>&lt; 뒤로가기</strong>
+      </a>
+      <!-- 중앙 로고 -->
+      <div class="position-absolute start-50 translate-middle-x text-center">
+        <a href="/league">
+          <img src="/path/to/logo.jpg" style="width: 45px; height: 45px;">
+        </a>
+      </div>
+    </header>
     <main>
       <div class="container mt-3">
         <h5 class="d-flex justify-content-center"><%= leagueName %> 간식점수</h5>
@@ -238,7 +263,7 @@
             <div class="input-group mb-3 player-search-container">
               <input class="form-control" list="datalistOptions" id="player-search" placeholder="회원 검색">
               <datalist id="datalistOptions">
-                <% members.forEach(member => { %>
+                <% memberRawData.forEach(member => { %>
                   <option value="<%= member.name %>"><%= member.name %></option>
                 <% }) %>
               </datalist>
@@ -262,12 +287,12 @@
           <div class="d-flex justify-content-center">
             <button type="submit" class="btn btn-warning w-50">점수입력</button>
             <div class="ms-1 me-1"></div>
-        </form>
-            <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">돌아가기</button>
           </div>
+        </form>
+          
       </div>
       <div style="height: 100px;"></div>
     </main>
-    <%- include('../../partials/footer.ejs') %>
+    <%- include('../../../partials/footer.ejs') %>
   </body>
 </html>

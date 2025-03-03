@@ -68,3 +68,96 @@
   .stepper-item:last-child::after {
     content: none;
   }
+
+  /* 250302 */
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* 다른 요소들 위에 표시되도록 설정 */
+    background-color: white; /* 배경색 */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    height: 60px; /* 헤더 높이 */
+    display: flex;
+    align-items: center;
+    }
+    
+    body {
+      padding-top: 60px; /* 헤더 높이만큼 여유 공간 설정 */
+    }
+
+    .back-button {
+      font-size: 16px;
+      padding-left: 15px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+
+    .refresh {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+    .info {
+      position: fixed;
+      bottom: 160px;
+      right: 20px;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: nowrap !important; /* 버튼이 한 줄 유지 */
+      width: 100%; /* 전체 너비 */
+    }
+
+    .btn-flex {
+      flex: 1; /* 버튼 크기를 균등하게 설정 */
+      min-width: 80px; /* 버튼 최소 크기 */
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      font-size: clamp(12px, 3vw, 14px); /* 반응형 폰트 크기 설정 */
+      text-align: center;
+      padding: 10px 5px; /* 버튼 크기 조정 */
+    }
+
+    .match-row {
+      display: flex;
+      flex-wrap: nowrap; /* 줄 바꿈 방지 */
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-players {
+      flex-grow: 1;
+      flex-basis: 0; /* 모든 요소가 균등한 크기를 가지도록 설정 */
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      font-size: clamp(12px, 3vw, 15px); /* 반응형 폰트 크기 (최소 12px ~ 최대 15px) */
+      text-align: left;
+    }
+
+    .match-score {
+      min-width: 70px; /* 점수가 너무 좁아지는 것을 방지 */
+      white-space: nowrap; /* 점수 줄 바꿈 방지 */
+      font-size: clamp(12px, 3vw, 15px); /* 점수도 반응형 크기로 유지 */
+    }
+
+    .ranking-table {
+      font-size: clamp(12px, 2.5vw, 15px); /* 화면 크기에 따라 폰트 크기 자동 조절 */
+      width: 100%; /* 테이블이 가득 차도록 설정 */
+    }
+
+    .player-name {
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      overflow: hidden; /* 너무 길어질 경우 잘리도록 설정 */
+      text-overflow: ellipsis; /* 넘치는 경우 "..." 표시 */
+      max-width: 120px; /* 셀 크기 제한 */
+      font-size: clamp(12px, 2.5vw, 15px); /* 선수 이름 폰트 크기 자동 조절 */
+    }
+
+    .seed-text {
+      font-size: clamp(10px, 2vw, 12px); /* '시드' 표시 크기 자동 조정 */
+    }

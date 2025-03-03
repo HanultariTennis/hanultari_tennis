@@ -9,7 +9,7 @@ const rankingRoutes = require('./routes/ranking');
 const leagueRoutes = require('./routes/league');
 const historyRoutes = require('./routes/history');
 const adminRoutes = require('./routes/admin');
-const noticeRoutes = require('./routes/notice');
+const boardRoutes = require('./routes/board');
 
 const {
   readGoogleSheet,
@@ -53,7 +53,7 @@ app.use(methodOverride('_method'));
 
 // Passport Local Strategy 설정
 passport.use(new LocalStrategy(async (username, password, done) => {
-  const members = await readGoogleSheet(memberSheets, 'member');
+  const members = await readGoogleSheet(memberSheets, 'active');
   const member = members.find(member => member.name == username);
 
   if (!member) {
@@ -85,7 +85,7 @@ app.use('/ranking', rankingRoutes);
 app.use('/league', leagueRoutes);
 app.use('/history', historyRoutes);
 app.use('/admin', adminRoutes);
-app.use('/notice', noticeRoutes);
+app.use('/board', boardRoutes);
 
 app.get('/', (req, res) => {
   if(req.isAuthenticated()) {
@@ -168,142 +168,13 @@ app.get('/test1', (req, res) => {
 
 })
 
-
-
-// app.post('/login',
-//   passport.authenticate('local', {
-//     successRedirect: '/league',
-//     failureRedirect: '/login',
-//     failureFlash: false
-//   })
-// );
-
-/* 포팅 임시 비활성화
-const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0';
-
-// app.listen(PORT, HOST, () => {
-//   console.log(`Server is running on http://${HOST}:${PORT}`);
-// });
-
-https.createServer(options, app).listen(443, () => {
-  console.log('HTTPS Server running on port 443');
-});
-
-// HTTP 서버에서 HTTPS로 리디렉션
-const httpApp = express();
-httpApp.use((req, res, next) => {
-  if (req.secure) {
-    next();
-  } else {
-    res.redirect(`https://${req.headers.host}${req.url}`);
-  }
-});
-
-
-// HTTP 서버 실행 (포트 80)
-http.createServer(httpApp).listen(80, () => {
-  console.log('HTTP Server running on port 80 and redirecting to HTTPS');
-});
-*/
-
-
-
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
+  Array(5).fill('').forEach(() => console.log(''));
+  console.log('**************************************************')
+  console.log(Date());
+  console.log('Server starts')
   console.log(`Server is running on port ${PORT}`);
+  console.log('**************************************************')
 });
-
-// Google 인증 설정
-// const auth = new google.auth.GoogleAuth({
-//   keyFile: 'singular-chain-446508-s3-1e059c3b3f2a.json', // JSON 키 파일 경로
-//   scopes: ['https://www.googleapis.com/auth/spreadsheets'], // 권한
-// });
-
-// async function accessGoogleSheets() {
-//   const client = await auth.getClient();
-
-//   const spreadsheetId = '1QTJ867_m8YqmWVOdLhBFdwjJLcNC-BwIjTBadknehLU'; // Google Sheets URL에서 ID 복사
-//   const range = 'member'; // 읽고/쓰고 싶은 범위
-
-//   // 데이터 읽기
-//   const readData = await sheets.spreadsheets.values.get({
-//       auth: client,
-//       spreadsheetId,
-//       range,
-//   });
-//   console.log('읽은 데이터:', readData.data.values);
-// }
-
-// accessGoogleSheets().catch(console.error);
-
-
-// const { MongoClient } = require('mongodb')
-
-// let db
-// const url = 'mongodb+srv://admin:gksdnfxkfl2007@hanultari-tennis.0rzdd.mongodb.net/?retryWrites=true&w=majority&appName=Hanultari-Tennis'
-// new MongoClient(url).connect().then((client)=>{
-//   console.log('DB연결성공')
-//   db = client.db('hanultari')
-// }).catch((err)=>{
-//   console.log(err)
-// })
-
-
-
-/****************************************************************************************************
- * google api
- ****************************************************************************************************/
-// const { google } = require('googleapis');
-// const sheets = google.sheets('v4');
-
-// let client;
-// const rankingSheets = '1QlTiXskeYQRZY5i0UQg-C4T88tLpa-fiWmHDvBTRdbc';
-// const tourSheets = '10WfSwZqwh_3B3y4fXzHbpZFy7lHMfORX4rC60oeps6U';
-// const leagueSheets = '1DbCinnMlibKxaM_u8EcPZEr0nSfOf1tYA_V-kY2Bkgw';
-// const matchSheets = '1eHhxYgmMseySauIuIaX746gIx9JmbDhx14qA7QvIGnw';
-// const memberSheets = '1QTJ867_m8YqmWVOdLhBFdwjJLcNC-BwIjTBadknehLU';
-// const auth = new google.auth.GoogleAuth({
-//   keyFile: 'singular-chain-446508-s3-1e059c3b3f2a.json', // JSON 키 파일 경로
-//   scopes: ['https://www.googleapis.com/auth/spreadsheets'], // 권한
-// });
-
-
-// // Google Sheets 클라이언트 초기화
-// async function initializeGoogleSheets() {
-//   client = await auth.getClient();
-//   console.log('Google Sheets 클라이언트 초기화 완료');
-// }
-
-// // 데이터 읽기 함수
-// async function readGoogleSheet(spreadsheetId, range) {
-//   if (!client) {
-//     console.error('Google Sheets 클라이언트가 초기화되지 않았습니다.');
-//     return;
-//   }
-//   if (!spreadsheetId || !range) {
-//     console.error('spreadsheetId 또는 range가 설정되지 않았습니다.');
-//     return;
-//   }
-//   const response = await sheets.spreadsheets.values.get({
-//     auth: client,
-//     spreadsheetId,
-//     range,
-//   });
-//   console.log(response.data.values);
-//   return response.data.values;
-// }
-
-// module.exports = {
-//   readGoogleSheet,
-//   rankingSheets,
-//   tourSheets,
-//   leagueSheets,
-//   matchSheets,
-//   memberSheets,
-// };
-
-/****************************************************************************************************
- * run
- ****************************************************************************************************/

@@ -5,12 +5,28 @@ const router = express.Router();
 
 const {
   readGoogleSheet,
+  writeGoogleSheet,
   rankingSheets,
   tourSheets,
   leagueSheets,
   matchSheets,
   memberSheets,
 } = require('./googleSheet');
+
+function compareDateStrings(date1, date2) {
+  // 날짜 문자열을 Date 객체로 변환
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  // 비교
+  if (d1 < d2) {
+    return -1; // date1이 date2보다 이전
+  } else if (d1 > d2) {
+    return 1; // date1이 date2보다 이후
+  } else {
+    return 0; // 동일한 날짜
+  }
+}
 
 // 엑셀 파일 경로
 const memberFilePath = path.join(__dirname, '../database', 'member.xlsx');
@@ -103,14 +119,28 @@ function getRankings(players, matches) {
 
 router.get('/', async (req, res) => {
   if(req.isAuthenticated()) {
-    const members = readExcelFile(memberFilePath).sort((a, b) => a.name.localeCompare(b.name));
-    let leagues = readExcelFile(leagueFilePath).map(league => {
+    const memberRawData = await readGoogleSheet(memberSheets, 'active');
+    const members = memberRawData.sort((a, b) => a.name.localeCompare(b.name));
+
+    const leagueRawData = await readGoogleSheet(leagueSheets, '2024');
+    let leagues = leagueRawData.map(league => {
       return {
         ...league,
         date: league.date
       };
     });
     leagues.sort((a, b) => b.date - a.date);
+    leagues.sort((a, b) => compareDateStrings(b.date, a.date));
+    console.log(leagues)
+
+    // let leagues2 = readExcelFile(leagueFilePath).map(league => {
+    //   return {
+    //     ...league,
+    //     date: league.date
+    //   };
+    // });
+    // leagues2.sort((a, b) => b.date - a.date);
+    // console.log(leagues2)
 
     res.render('pages/history/history', {
       leagues,

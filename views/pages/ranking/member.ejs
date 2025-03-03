@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>회원 상세 정보</title>
   <link rel="stylesheet" href="/styles.css">
   <style>
     .logout {
       position: fixed;
-      bottom: 15%;
-      right: 5%;
+      bottom: 100px;
+      right: 20px;
       z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
     }
     .manager {
       position: fixed;
-      bottom: 25%;
-      right: 5%;
+      bottom: 160px;
+      right: 20px;
       z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
     }
   </style>
@@ -270,25 +270,24 @@
     
     <div style="height: 100px;"></div>
   </main>
+  <!-- 로그아웃 버튼 -->
   <% if (userName == name) { %>
-    <div class="bg-danger text-white text-center align-content-center logout rounded-pill z-3" style="width: 50px; height: 50px;">
-      <a href="/logout">
-        <img src="/icon/logout.svg" style="width: 60%; height: 60%;">
+    <div class="bg-danger text-white text-center align-content-center logout rounded-5 z-3" style="width: 120px; height: 50px;  display: flex; align-items: center; justify-content: center;"">
+      <a href="/logout" style="color: white; text-decoration: none;">
+        <img src="/icon/logout.svg" style="width: 30px; height: 30px">
+        <span>로그아웃</span>
       </a>
     </div>
   <% } else { %>
     
   <% } %>
-  
-  <% if ( (userName == name) && ((userRole == '관리자') || (userRole == '회장') || (userRole == '부회장'))) { %>
-    <div class="bg-primary text-white text-center align-content-center manager rounded-pill" style="width: 50px; height: 50px; z-index: 1000;">
-      <a href="/admin">
-        <img src="/icon/manager.svg" class="w-75 h-75">
-      </a>
-    </div>
-  <% } else { %>
-    
-  <% } %>
+  <!-- 매니저 버튼 -->
+  <div class="bg-primary text-white text-center align-content-center manager rounded-5 z-3" style="width: 120px; height: 50px;  display: flex; align-items: center; justify-content: center;"">
+    <a href="/admin" style="color: white; text-decoration: none;">
+      <img src="/icon/manager.svg" style="width: 30px; height: 30px">
+      <span>관리메뉴</span>
+    </a>
+  </div>
   <%- include('../../partials/footer.ejs') %>
 </body>
 </html>

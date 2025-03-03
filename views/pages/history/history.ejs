@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>리그 리스트</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>한울타리 테니스</title>
   <link rel="stylesheet" href="/styles.css">
   <script>
     function filterByPlayer() {
@@ -42,6 +42,22 @@
         }
       }
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const select = document.getElementById("searchSeason");
+      const currentYear = new Date().getFullYear(); // 현재 연도 가져오기
+      const startYear = 2024; // 시작 연도
+
+      for (let year = currentYear; year >= startYear; year--) {
+        let option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+          option.selected = true; // 현재 연도를 기본 선택
+        }
+        select.appendChild(option);
+      }
+    });
   </script>
 </head>
 <body>
@@ -56,10 +72,6 @@
           <div class="col">
             <span style="font-size: small;">시즌</span>
             <select class="form-select form-select-sm border-warning" aria-label="Default select example" id="searchSeason">
-              <option value="2024" selected>2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
-              <option value="2021">2021</option>
             </select>
           </div>
           <div class="col">

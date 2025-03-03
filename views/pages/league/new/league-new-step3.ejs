@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>리그 생성 - 시드 배정</title>
     <link rel="stylesheet" href="/styles.css">
     <script>
@@ -65,7 +65,7 @@
     </script>
 </head>
 <body>
-  <%- include('../../partials/header') %>
+  <%- include('../../../partials/header') %>
   <main>
     <div class="container mt-3">
       <h5 class="d-flex justify-content-center mb-3">리그생성</h5>
@@ -123,14 +123,14 @@
         </div>
         <input type="hidden" id="newSeed" name="newSeed" value="">
         <div class="container d-flex justify-content-center">
-          <button type="submit" class="btn btn-warning w-50" onclick="getSeedData()">다음단계</button>
-          <div class="ms-1 me-1"></div>
           <button type="button" class="btn btn-secondary w-50" onclick="window.history.back()">뒤로가기</button>
+          <div class="ms-1 me-1"></div>
+          <button type="submit" class="btn btn-warning w-50" onclick="getSeedData()">다음단계</button>
         </div>
       </form>
     <div style="height: 100px;"></div>
   </main>
-  <%- include('../../partials/footer') %>
+  <%- include('../../../partials/footer') %>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
   <script>
     function updateRowNumbersAndColors() {

@@ -4,6 +4,19 @@ const path = require('path');
 const xlsx = require('xlsx');
 const ExcelJS = require('exceljs');
 
+const {
+  readGoogleSheet,
+  writeGoogleSheet,
+  appendNextRow,
+  appendNextColumn,
+  courtSheets,
+  rankingSheets,
+  tourSheets,
+  leagueSheets,
+  matchSheets,
+  memberSheets,
+} = require('./googleSheet');
+
 // 엑셀 파일 경로
 const matchFilePath = path.join(__dirname, '../database', 'match.xlsx');
 const leagueFilePath = path.join(__dirname, '../database', 'league.xlsx');
@@ -124,7 +137,7 @@ function getMaxSeeds(format, playerCount) {
   return 0;
 }
 
-function getLeagueRankings(league) {
+function getLeagueRankings(league, members) {
   const stats = league.players.map(player => ({
     name: player.name,
     age: player.name.endsWith('G') ? 45292 : members.find(member => member.name === player.name).birth, 
@@ -333,8 +346,6 @@ function getLeagueRanking(league) {
   return sortedPlayers;
 }
 
-// 회원 데이터 전역 변수
-let members = readExcelFile(memberFilePath).sort((a, b) => a.name.localeCompare(b.name));
 let courts = [];
 let newLeague = {};
 let leagues = [];
@@ -400,35 +411,44 @@ router.get('/', (req, res) => {
       userName: req.user.name,
       userRole: req.user.role
     });
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Entered the league main page');
+    console.log('Who:', req.user.name);
+    console.log('')
+    console.log('**************************************************')
   } else {
     res.redirect('/login');
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Go back to login :: Not authenticated');
+    console.log('')
+    console.log('**************************************************')
   }
 });
 
 // 리그 상세 페이지
-router.get('/detail', (req, res) => {
+router.get('/detail', async (req, res) => {
   if(req.isAuthenticated()) {
+    const memberRawData = await readGoogleSheet(memberSheets, 'active');
     const leagueIndex = req.query.leagueIndex;
     const league = leagues[leagueIndex];
     const leaguePlayers = league.players.map(player => player.name);
     const players = [...new Set([
       ...league.players.map(player => player.name),
-      ...members.map(member => member.name)
+      ...memberRawData.map(member => member.name)
     ])];
-    const rankingTest = getLeagueRankings(league);
+    const rankingTest = getLeagueRankings(league, memberRawData);
     
-
     courts = [...new Set(readExcelFile(courtFilePath).map(court => court.place))];
-    
-    console.log('****************************************')
-    console.log('리그에 입장했습니다!')
-    console.log('사용자 :', req.user.name);
-    console.log(Date());
-    console.log('****************************************')
-    console.log('');
-    console.log('');
 
-    res.render('pages/league/league-detail', {
+    res.render('pages/league/detail/league-detail-main', {
       league,
       leagueIndex,
       leagues,
@@ -436,8 +456,25 @@ router.get('/detail', (req, res) => {
       userName: req.user.name,
       userRole: req.user.role
     });
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Go to league detail :: ', league.name);
+    console.log('Who:', req.user.name);
+    console.log('')
+    console.log('**************************************************')
   } else {
     res.redirect('/login');
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Go back to login :: Not authenticated');
+    console.log('')
+    console.log('**************************************************')
   }
 });
 
@@ -453,17 +490,24 @@ router.get('/info', (req, res) => {
     })
   } else {
     res.redirect('/login');
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Go back to login :: Not authenticated');
+    console.log('')
+    console.log('**************************************************')
   }
 });
 
 // 새 리그 기본 정보 페이지
-router.get('/new/info', (req, res) => {
+router.get('/new/info', async (req, res) => {
   if(req.isAuthenticated()) {
-    courts = [...new Set(readExcelFile(courtFilePath).map(court => court.place))];
-
-    res.render('pages/league/league-new-info', {
-      members,
-      courts,
+    const courtRawData = await readGoogleSheet(courtSheets, 'court');
+    
+    res.render('pages/league/new/league-new-step1', {
+      courtRawData,
       leagueType: '',
       date: '',
       court: '',
@@ -471,15 +515,26 @@ router.get('/new/info', (req, res) => {
       userRole: req.user.role
     });
 
-    console.log('****************************************')
-    console.log('새 리그 기본 정보 선택을 시작합니다!')
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
     console.log(Date());
-    console.log('사용자:', req.user.name);
-    console.log('****************************************')
-    console.log('');
-    console.log('');
+    console.log('New league step 1 :: Information')
+    console.log('Who:', req.user.name);
+    console.log('')
+    console.log('**************************************************')
+    
   } else {
     res.redirect('/login');
+
+    Array(5).fill('').forEach(() => console.log(''));
+    console.log('**************************************************')
+    console.log('')
+    console.log(Date());
+    console.log('Go back to login :: Not authenticated')
+    console.log('Who:', req.user.name);
+    console.log('')
+    console.log('**************************************************')
   }
 });
 
@@ -516,24 +571,29 @@ router.post('/new/info', (req, res) => {
 });
 
 // 새 리그 참가자 페이지
-router.get('/new/who', (req, res) => {
-  const selectedFormat = newLeague.format;
+router.get('/new/who', async (req, res) => {
+  if(req.isAuthenticated()) {
+    const memberRawData = await readGoogleSheet(memberSheets, 'active');
+    const selectedFormat = newLeague.format;
 
-  res.render('pages/league/league-new-who', {
-    selectedFormat,
-    members,
-    selectedPlayers: newLeague.players ? newLeague.players.map(p => p.name) : [],
-    userName: req.user.name,
-    userRole: req.user.role
-  });
+    res.render('pages/league/new/league-new-step2', {
+      selectedFormat,
+      memberRawData,
+      selectedPlayers: newLeague.players ? newLeague.players.map(p => p.name) : [],
+      userName: req.user.name,
+      userRole: req.user.role
+    });
 
-  console.log('****************************************')
-  console.log('새 리그 참가자 선택을 시작합니다!')
-  console.log(Date());
-  console.log('사용자:', req.user.name);
-  console.log('****************************************')
-  console.log('');
-  console.log('');
+    console.log('****************************************')
+    console.log('새 리그 참가자 선택을 시작합니다!')
+    console.log(Date());
+    console.log('사용자:', req.user.name);
+    console.log('****************************************')
+    console.log('');
+    console.log('');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // 새 리그 참가자 제출
@@ -599,7 +659,7 @@ router.get('/new/seed', (req, res) => {
   const selectedFormat = newLeague.format;
   const maxSeeds = getMaxSeeds(newLeague.format, newLeague.people);
 
-  res.render('pages/league/league-new-seed', {
+  res.render('pages/league/new/league-new-step3', {
     selectedFormat,
     selectedPlayers,
     people: newLeague.people,
@@ -677,33 +737,6 @@ router.get('/new/match', (req, res) => {
   const playerMapping = {};
   const seedData = xlsx.utils.sheet_to_json(worksheet, { range: `A1:B${people + 1}`, header: 1 });
 
-  // if (people === 4 || people === 5) {
-  //   // 시드 없이 순서대로 매핑
-  //   // let allPlayers = newLeague.players.map(player => player.id);
-  //   let allPlayers = newLeague.players.map(player => player.name);
-  //   seedData.slice(1).forEach(row => {
-  //     const [, player] = row;
-  //     playerMapping[player] = allPlayers.shift() || "N/A";
-  //   });
-  // } else {
-  //   // 시드와 비시드 매핑
-  //   const seedPlayer = newLeague.players.filter(player => player.seed).map(player => player.name);
-  //   const noSeedPlayer = newLeague.players.filter(player => !player.seed).map(player => player.name);
-  //   let seedIndex = 0;
-  //   let noSeedIndex = 0;
-
-  //   seedData.slice(1).forEach(row => {
-  //     const [num, player] = row;
-  //     if (num && player) {
-  //       if (num.startsWith('시드')) {
-  //         playerMapping[player] = seedPlayer[seedIndex] ? seedPlayer[seedIndex++] : noSeedPlayer[noSeedIndex++] || "N/A";
-  //       } else if (num.startsWith('비시드')) {
-  //         playerMapping[player] = noSeedPlayer[noSeedIndex] ? noSeedPlayer[noSeedIndex++] : seedPlayer[seedIndex++] || "N/A";
-  //       }
-  //     }
-  //   });
-  // }
-
   let index;
   const playerNames = newLeague.players.map(player => player.name);
   const playerSeeds = newLeague.players.map(player => player.seed);
@@ -717,15 +750,8 @@ router.get('/new/match', (req, res) => {
         }
       }
 
-      // if(seed && player) {
-      //   if(seed == newLeague.player[index].seed) {
-      //     playerMapping[player] = newLeague.player[index].name;
-      //     index++;
-      //   }
-      // }
-  });
 
-  // console.log('Participant Mapping:', playerMapping);
+  });
 
   // 매핑 결과 디버깅
   newLeague.players.forEach(player => {
@@ -747,10 +773,7 @@ router.get('/new/match', (req, res) => {
 
   newLeague.matches = matchTable;
 
-  // console.log('Participants:', newLeague.players); // 참가자 리스트 출력
-  // console.log('Match Table:', matchTable); // 매치 리스트 출력
-
-  res.render('pages/league/league-new-match', {
+  res.render('pages/league/new/league-new-step4', {
     league: newLeague,
     matchTable,
     userName: req.user.name,
@@ -800,13 +823,14 @@ router.post('/new/self', (req, res) => {
 });
 
 // 리그 수정 페이지
-router.get('/edit', (req, res) => {
+router.get('/edit', async (req, res) => {
+  const memberRawData = await readGoogleSheet(memberSheets, 'active');
   const leagueIndex = req.query.leagueIndex;
   const league = leagues[leagueIndex];
   const leaguePlayers = league.players.map(player => player.name);
   const players = [...new Set([
     ...league.players.map(player => player.name),
-    ...members.map(member => member.name)
+    ...memberRawData.map(member => member.name)
   ])];
 
   courts = [...new Set(readExcelFile(courtFilePath).map(court => court.place))];
@@ -821,7 +845,7 @@ router.get('/edit', (req, res) => {
   console.log('');
   console.log('');
 
-  res.render('pages/league/league-edit', {
+  res.render('pages/league/detail/league-detail-edit', {
     leagueIndex,
     league,
     players,
@@ -907,7 +931,7 @@ router.get('/score', (req, res) => {
       return res.status(404).send('매치를 찾을 수 없습니다.');
     }
   
-    res.render('pages/league/league-score', {
+    res.render('pages/league/detail/league-detail-score', {
       leagueIndex,
       matchIndex,
       match,
@@ -944,95 +968,15 @@ router.post('/score', (req, res) => {
   }
 });
 
-// 리그 순위 페이지
-router.get('/ranking', (req, res) => {
-  const leagueIndex = req.query.leagueIndex;
-  const league = leagues[leagueIndex];
-
-  if (!league) {
-    return res.status(404).send('리그를 찾을 수 없습니다.');
-  }
-
-  // 초기화
-  league.players.forEach(player => {
-    player.wins = 0;
-    player.losses = 0;
-    player.totalScore = 0;
-    player.totalLostScore = 0;
-    player.matchPlayed = 0;
-  });
-
-  // 매치 결과를 반영
-  league.matches.forEach(match => {
-    if (match.score) {
-      const [team1Score, team2Score] = match.score.split(':').map(Number);
-
-      const team1Player1 = league.players.find(p => p.name === match.team1[0]);
-      const team1Player2 = league.players.find(p => p.name === match.team1[1]);
-      const team2Player1 = league.players.find(p => p.name === match.team2[0]);
-      const team2Player2 = league.players.find(p => p.name === match.team2[1]);
-
-      if (team1Score > team2Score) {
-        team1Player1.wins++;
-        team1Player2.wins++;
-        team2Player1.losses++;
-        team2Player2.losses++;
-      } else {
-        team1Player1.losses++;
-        team1Player2.losses++;
-        team2Player1.wins++;
-        team2Player2.wins++;
-      }
-
-      team1Player1.totalScore += team1Score;
-      team1Player2.totalScore += team1Score;
-      team2Player1.totalScore += team2Score;
-      team2Player2.totalScore += team2Score;
-
-      team1Player1.totalLostScore += team2Score;
-      team1Player2.totalLostScore += team2Score;
-      team2Player1.totalLostScore += team1Score;
-      team2Player2.totalLostScore += team1Score;
-
-      team1Player1.matchPlayed++;
-      team1Player2.matchPlayed++;
-      team2Player1.matchPlayed++;
-      team2Player2.matchPlayed++;
-    }
-  });
-
-  // 순위 정렬
-  const sortedPlayers = league.players.sort((a, b) => {
-    if (b.wins !== a.wins) {
-      return b.wins - a.wins;
-    }
-    return (b.totalScore - b.totalLostScore) - (a.totalScore - a.totalLostScore);
-  });
-
-  // 순위 부여
-  sortedPlayers.forEach((player, index) => {
-    player.rank = index + 1;
-  });
-
-  const rankingTest = getLeagueRankings(league);
-
-  res.render('pages/league/league-ranking', {
-    league,
-    rankingTest,
-    players: sortedPlayers,
-    userName: req.user.name,
-    userRole: req.user.role
-  });
-});
-
 // 리그 간식 점수 페이지
-router.get('/snack', (req, res) => {
+router.get('/snack', async (req, res) => {
+  const memberRawData = await readGoogleSheet(memberSheets, 'active');
   const leagueIndex = req.query.leagueIndex;
   const league = leagues[leagueIndex];
   const snackScores = league.snackScores || [];
 
-  res.render('pages/league/league-snack', {
-    members,
+  res.render('pages/league/detail/league-detail-snack', {
+    memberRawData,
     leagueName: league.name,
     leagueIndex,
     // snackScores: JSON.stringify(snackScores)
@@ -1082,7 +1026,8 @@ router.get('/meal', (req, res) => {
 });
 
 // 리그 종료 페이지
-router.get('/end', (req, res) => {
+router.get('/end', async (req, res) => {
+  const memberRawData = await readGoogleSheet(memberSheets, 'active');
   const leagueIndex = req.query.leagueIndex;
   const league = leagues[leagueIndex];
 
@@ -1151,9 +1096,9 @@ router.get('/end', (req, res) => {
     player.rank = index + 1;
   });
 
-  const leagueRanking = getLeagueRankings(league);
+  const leagueRanking = getLeagueRankings(league, memberRawData);
 
-  res.render('pages/league/league-end', {
+  res.render('pages/league/detail/league-detail-end', {
     leagueIndex,
     league,
     leagueRanking,

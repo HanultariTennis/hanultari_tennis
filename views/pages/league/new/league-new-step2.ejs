@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>HTCm</title>
   <link rel="stylesheet" href="/styles.css">
   <script>
@@ -153,7 +153,7 @@
   </style>
 </head>
 <body>
-  <%- include('../../partials/header.ejs') %>
+  <%- include('../../../partials/header.ejs') %>
   <main>
     <div class="container mt-3">
       <h5 class="d-flex justify-content-center">리그생성</h5>
@@ -214,7 +214,7 @@
               <div>
                 <table class="table table-borderless">
                   <tbody>
-                    <% members.forEach((member, index) => { %>
+                    <% memberRawData.forEach((member, index) => { %>
                       <% if ((index % 3) == 0) { %>
                         <tr>
                           <td>
@@ -256,6 +256,6 @@
     </div>
     <div style="height: 100px;"></div>
   </main>
-  <%- include('../../partials/footer.ejs') %>
+  <%- include('../../../partials/footer.ejs') %>
 </body>
 </html>

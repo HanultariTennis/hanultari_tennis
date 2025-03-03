@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>한울타리 테니스</title>
+  <link rel="apple-touch-icon" href="../../path/to/180.png">
+  <style>
+    header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* 다른 요소들 위에 표시되도록 설정 */
+    background-color: white; /* 배경색 */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    height: 60px; /* 헤더 높이 */
+    display: flex;
+    align-items: center;
+    }
+    
+    body {
+      padding-top: 60px; /* 헤더 높이만큼 여유 공간 설정 */
+    }
+
+    .back-button {
+      font-size: 16px;
+      padding-left: 15px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+
+    .refresh {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+    .info {
+      position: fixed;
+      bottom: 160px;
+      right: 20px;
+      z-index: 1000; /* 다른 요소들 위에 표시되도록 z-index 설정 */
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: nowrap !important; /* 버튼이 한 줄 유지 */
+      width: 100%; /* 전체 너비 */
+    }
+
+    .btn-flex {
+      flex: 1; /* 버튼 크기를 균등하게 설정 */
+      min-width: 50px; /* 버튼 최소 크기 */
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      font-size: clamp(10px, 2.5vw, 13px); /* 반응형 폰트 크기 설정 */
+      text-align: center;
+      padding: 10px 5px; /* 버튼 크기 조정 */
+    }
+
+    .match-row {
+      display: flex;
+      flex-wrap: nowrap; /* 줄 바꿈 방지 */
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-players {
+      flex-grow: 1;
+      flex-basis: 0; /* 모든 요소가 균등한 크기를 가지도록 설정 */
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      font-size: clamp(12px, 3vw, 15px); /* 반응형 폰트 크기 (최소 12px ~ 최대 15px) */
+      text-align: left;
+    }
+
+    .match-score {
+      min-width: 70px; /* 점수가 너무 좁아지는 것을 방지 */
+      white-space: nowrap; /* 점수 줄 바꿈 방지 */
+      font-size: clamp(12px, 3vw, 15px); /* 점수도 반응형 크기로 유지 */
+    }
+
+    .ranking-table {
+      font-size: clamp(12px, 2.5vw, 15px); /* 화면 크기에 따라 폰트 크기 자동 조절 */
+      width: 100%; /* 테이블이 가득 차도록 설정 */
+    }
+
+    .player-name {
+      white-space: nowrap; /* 줄 바꿈 방지 */
+      overflow: hidden; /* 너무 길어질 경우 잘리도록 설정 */
+      text-overflow: ellipsis; /* 넘치는 경우 "..." 표시 */
+      max-width: 120px; /* 셀 크기 제한 */
+      font-size: clamp(12px, 2.5vw, 15px); /* 선수 이름 폰트 크기 자동 조절 */
+    }
+
+    .seed-text {
+      font-size: clamp(10px, 2vw, 12px); /* '시드' 표시 크기 자동 조정 */
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- 헤더 -->
+    <header class="position-fixed top-0 start-0 w-100 bg-white shadow-sm py-2">
+      <!-- 뒤로가기 버튼 (왼쪽 정렬) -->
+      <a href="/league" class="position-absolute start-0 ps-3 btn btn-link text-dark text-decoration-none">
+        <strong>&lt; 뒤로가기</strong>
+      </a>
+      <!-- 중앙 로고 -->
+      <div class="position-absolute start-50 translate-middle-x text-center">
+        <a href="/league">
+          <img src="/path/to/logo.jpg" style="width: 45px; height: 45px;">
+        </a>
+      </div>
+    </header>
+    <!-- 본문 -->
+    <div class="mt-3">
+      <!-- 제목 -->
+      <div class="mb-3">
+        <h5 class="d-flex justify-content-center"><%= league.name %></h5>
+      </div>
+      <!-- 버튼 집합 -->
+      <div class="container px-3">
+        <form id="leagueEnd" action="/league/end" method="POST">
+          <input type="hidden" name="leagueIndex" value="<%= leagueIndex %>">
+          <input type="hidden" name="deleteCommand" value="false" id="deleteCommand">
+          <div class="btn-group d-flex justify-content-center flex-nowrap mb-3 w-100" role="group" aria-label="Basic outlined example">
+            <a href="/league/snack?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-black bg-warning bg-opacity-75 btn-flex">간식점수</a>
+            <a href="/league/edit?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-black bg-warning bg-opacity-75 btn-flex">리그수정</a>
+            <a href="/league/end?leagueIndex=<%= leagueIndex %>" class="btn btn-outline-warning text-black bg-warning bg-opacity-75 btn-flex">리그마감</a>
+            <button class="btn btn-outline-warning bg-warning bg-opacity-75 text-danger fw-bold btn-flex" onclick="deleteForm(event)">리그삭제</button>
+          </div>
+        </form>
+      </div>
+      <!-- 진행 상황 -->
+      <div class="mb-3">
+        <ul class="list-group list-group-flush text-center">
+          <!-- 리그 리스트 -->
+          <li class="list-group-item">
+            <div class="mb-2 d-flex align-items-center">
+              <!-- 타이틀 -->
+              <div class="text-start flex-shrink-0 me-3">
+                <strong style="font-size: 18px;">진행 상황</strong>
+              </div>
+              <!-- 진척도 -->
+              <div class="flex-grow-1">
+                <% let matchProgress = 0; %>
+                <% league.matches.forEach(function(match, matchIndex) { %>
+                  <% if (match.score) { %>
+                    <% matchProgress++; %>
+                  <% } %>
+                <% }) %>
+                <% const matchPercent = Math.round((matchProgress / league.matches.length) * 100); %>
+                <div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-black" style="width: <%= matchPercent %>%">
+                    <%= matchPercent %> %
+                  </div>
+                  <% if (matchPercent == 0) { %>
+                    <div class="m-auto">0 %</div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <div style="font-size: 15px;">
+              <% league.matches.forEach(function(match, matchIndex) { %>
+                <ul class="list-group mb-2">
+                  <!-- 매치 번호 -->
+                  <li class="list-group-item bg-body-secondary d-flex justify-content-between align-items-center">
+                    <div class="text-start flex-grow-1">
+                      <strong class="text-secondary"><%= matchIndex + 1 %>번 매치</strong>
+                    </div>
+                    <div>
+                      <a type="button" class="btn btn-sm btn-warning fw-bold w-100" href="score?leagueIndex=<%= leagueIndex %>&matchIndex=<%= matchIndex %>">점수입력</a>
+                    </div>
+                  </li>
+                  <!-- 매치 내용 -->
+                  <li class="list-group-item d-flex align-items-center match-row">
+                    <!-- 매치별 선수 -->
+                    <div class="text-start match-players">
+                      <strong><%= match.team1[0] %></strong>
+                      <strong><%= match.team1[1] %></strong>
+                      <strong>VS</strong>
+                      <strong><%= match.team2[0] %></strong>
+                      <strong><%= match.team2[1] %></strong>
+                    </div>
+                    <!-- 매치별 점수 -->
+                    <div class="text-end match-score">
+                      <% if (match.score && match.score.split(':')[0] == '6') { %>
+                        <strong class="text-primary"><%= match.score.split(':')[0] %></strong>
+                        <strong> : </strong>
+                        <strong><%= match.score.split(':')[1] %></strong>
+                      <% } else if (match.score && match.score.split(':')[1] == '6') { %>
+                        <strong><%= match.score.split(':')[0] %></strong>
+                        <strong> : </strong>
+                        <strong class="text-primary"><%= match.score.split(':')[1] %></strong>
+                      <% } else { %>
+                        <strong>0 : 0</strong>
+                      <% } %>
+                    </div>
+                  </li>
+                </ul>
+              <% }) %>
+            </div>
+          </li>
+          <!-- 순위 -->
+          <li class="list-group-item">
+            <strong style="font-size: 18px;">순위</strong>
+            <table class="table table-striped text-center ranking-table">
+              <thead>
+                <tr>
+                  <th class="bg-white">#</th>
+                  <th class="bg-white">선수</th>
+                  <th class="bg-white">승</th>
+                  <th class="bg-white">패</th>
+                  <th class="bg-white">득</th>
+                  <th class="bg-white">실</th>
+                  <th class="bg-white">득실차</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% rankingTest.forEach((ranking, index) => { %>
+                  <tr>
+                    <th scope="row"><%= index + 1 %></th>
+                    <td class="player-name">
+                      <% const playerSeed = league.players.find(player => player.name == ranking.name).seed %>
+                      <% if (playerSeed.startsWith('시드')) { %>
+                        <span><%= ranking.name %></span><span class="text-secondary seed-text">(시드)</span>
+                      <% } else { %>
+                        <span><%= ranking.name %></span>
+                      <% } %>
+                    </td>
+                    <td class="text-primary fw-bold"><%= ranking.wins %></td>
+                    <td class="text-danger fw-bold"><%= ranking.losses %></td>
+                    <td><%= ranking.winGames %></td>
+                    <td><%= ranking.loseGames %></td>
+                    <td><%= ranking.gapWinLoss %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </li>
+          <li class="list-group-item">
+            <strong style="font-size: 18px;">간식</strong>
+            <table class="table table-striped text-center">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>점수</th>
+                  <th>비고</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (league.snackScores && league.snackScores.length > 0) { %>
+                  <% league.snackScores.forEach(function(snackScore, index) { %>
+                    <tr>
+                      <th scope="row"><%= snackScore.name %></th>
+                      <td><%= snackScore.score %></td>
+                      <td><%= snackScore.remark %></td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </li>
+        </ul>
+      </div>
+      <div style="height: 100px;"></div>
+    </div> 
+  </main>
+  <script>
+    function toggleLeagueDetails(index) {
+      const details = document.getElementById(`league-details-${index}`);
+      const button = document.querySelector(`.btn[onclick="toggleLeagueDetails(${index})"]`);
+      if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        button.textContent = '접기';
+      } else {
+        details.classList.add('hidden');
+        button.textContent = '펼치기';
+      }
+    }
+
+    function refreshPage() {
+      location.reload();
+    }
+
+    function deleteForm(event) {
+      var confirmation = confirm("정말로 리그를 삭제하시겠습니까?");
+      if (confirmation) {
+        document.getElementById("deleteCommand").value = "true";
+        document.getElementById("leagueEnd").submit(); // 사용자가 '네'를 선택한 경우 폼을 제출
+      } else {
+        event.preventDefault(); // 기본 폼 제출을 막음
+      }
+    }
+
+    function endForm(event) {
+      var confirmation = confirm("정말로 리그를 마감하시겠습니까?");
+      if (confirmation) {
+        document.getElementById("deleteCommand").value = "false";
+        document.getElementById("leagueEnd").submit(); // 사용자가 '네'를 선택한 경우 폼을 제출
+      } else {
+        event.preventDefault(); // 기본 폼 제출을 막음
+      }
+    }
+
+    // 페이지 로드 시 모든 리그 세부 사항을 숨김
+    document.addEventListener('DOMContentLoaded', function() {
+      const details = document.querySelectorAll('[id^="league-details-"]');
+      details.forEach(detail => detail.classList.add('hidden'));
+      const buttons = document.querySelectorAll('.toggle-button');
+      buttons.forEach(button => button.textContent = '펼치기');
+    });
+  </script>
+  <div class="bg-success text-white text-center align-content-center info rounded-5 z-3" style="width: 120px; height: 50px; display: flex; align-items: center; justify-content: center;">
+    <a href="/league/info?leagueIndex=<%= leagueIndex %>" style="color: white; text-decoration: none;">
+      <img src="/icon/information.svg" style="width: 30px; height: 30px;">
+      <span>상세정보</span>
+    </a>
+  </div>
+  <div class="bg-primary text-white text-center align-content-center refresh rounded-5 z-3" style="width: 120px; height: 50px; display: flex; align-items: center; justify-content: center;">
+    <a onclick="refreshPage()" style="color: white; text-decoration: none;">
+      <img src="/icon/refresh.svg" style="width: 30px; height: 30px;">
+      <span>새로고침</span>
+    </a>
+  </div>
+  <%- include('../../../partials/footer.ejs') %>
+</body>
+</html>
